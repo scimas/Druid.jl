@@ -41,8 +41,8 @@ function execute(client::Client, query)
             throw(Base.IOError)
         elseif isa(err, StatusError)
             if err.status ÷ 100 == 5
-                try
-                    err_message = parse(String(err.response.body))
+                err_message = try
+                    parse(String(err.response.body))
                 catch _e
                     println("Druid error during query execution, error message unavailable")
                     println("Query: ", query)
