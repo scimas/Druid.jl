@@ -16,19 +16,47 @@ export Client, execute
 """
     Client
 
+    Client(url::URIs.URI)
+    Client(url::AbstractString)
+    Client(host, port, endpoint, scheme)
+
 Druid SQL query endpoint connection information store.
+
+#Examples
+```julia-repl
+julia> client = Client("http://localhost:8888/druid/v2/sql")
+Client(URI("http://localhost:8888/druid/v2/sql"))
+
+julia> client = Client("localhost", 8082, "druid/v2/sql", "http")
+Client(URI("http://localhost:8082/druid/v2/sql"))
+```
 """
 struct Client
     url::URI
 end
 Client(host, port, endpoint, scheme) = 
     Client(joinpath(URI(;scheme=scheme, host=host, port=port), endpoint))
+Client(url::AbstractString) = Client(URI(url))
 
 """
     execute(client, query)
 
 Executes the Druid SQL `query` on the `client::Client`. Returns a `JSONTable` -
 compatible with Tables.jl interface.
+
+Throws exception if query execution fails.
+
+#Examples
+```julia-repl
+julia> execute(client, "SELECT * FROM some_datasource LIMIT 10")
+JSONTables.Table{...
+
+julia> execute(client, "SELECT * FROM non_existent_datasource")
+Failed Query: SELECT * FROM non_existent_datasource
+Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException","host" => nothing,"error" => "Unknown exception","errorMessage" => "org.apache.calcite.runtime.CalciteContextException: From line 1, column 15 to line 1, column 23: Object 'testdata2' not found")
+ERROR: Couldn't execute query
+Stacktrace: ...
+```
 """
 function execute(client::Client, query)
     post_data = Dict("query" => query)
