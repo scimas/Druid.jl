@@ -60,27 +60,23 @@ Stacktrace: ...
 """
 function execute(client::Client, query)
     post_data = Dict("query" => query)
-    response = try
-        request("POST", client.url, ["Content-Type" => "application/json"], json(post_data))
+    local response
+    try
+        response = request("POST", client.url, ["Content-Type" => "application/json"], json(post_data))
     catch err
         if isa(err, IOError)
-            println("I/O Error happened during query execution")
-            println(err.e)
-            throw(Base.IOError)
+            error("I/O Error during query execution")
         elseif isa(err, StatusError)
             if err.status ÷ 100 == 5
-                err_message = try
-                    parse(String(err.response.body))
+                local err_message
+                try
+                    err_message = parse(String(err.response.body))
                 catch _e
-                    println("Druid error during query execution, error message unavailable")
-                    println("Query: ", query)
-                    throw(Base.IOError)
+                    error("Druid error during query execution, error message unavailable\n", "Query: ", query)
                 end
-                println("Failed Query: ", query)
-                println(err_message)
-                throw(ErrorException("Couldn't execute query"))
-            throw(ErrorException("Query failed with status $(err.status)"))
+                error("Druid query execution failed with error:\n", err_message, "\nFailed query: ", query)
             end
+            error("Druid query execution failed with status $(err.status)")
         end
     end
     jsontable(response.body)
