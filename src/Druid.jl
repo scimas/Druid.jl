@@ -45,8 +45,8 @@ Executes the Druid SQL `query` on the `client::Client`. Returns the query result
 as parsed by the `parser` (a `JSONTable` - compatible with Tables.jl interface -
 by default). Throws exception if query execution fails.
 
-Pass the `identity` function as `parser` if the results are needed exactly as received from
-Druid.
+Pass the `String` function as `parser` if the results are needed exactly as
+received from Druid.
 
 #Examples
 ```julia-repl
