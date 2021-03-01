@@ -39,12 +39,14 @@ Client(host, port, endpoint, scheme) =
 Client(url::AbstractString) = Client(URI(url))
 
 """
-    execute(client, query)
+    execute(client, query; parser=JSONTables.jsontable)
 
-Executes the Druid SQL `query` on the `client::Client`. Returns a `JSONTable` -
-compatible with Tables.jl interface.
+Executes the Druid SQL `query` on the `client::Client`. Returns the query result
+as parsed by the `parser` (a `JSONTable` - compatible with Tables.jl interface -
+by default). Throws exception if query execution fails.
 
-Throws exception if query execution fails.
+Pass the `identity` function as `parser` if the results are needed exactly as received from
+Druid.
 
 #Examples
 ```julia-repl
@@ -58,7 +60,7 @@ ERROR: Couldn't execute query
 Stacktrace: ...
 ```
 """
-function execute(client::Client, query)
+function execute(client::Client, query; parser=jsontable)
     post_data = Dict("query" => query)
     local response
     try
@@ -79,7 +81,7 @@ function execute(client::Client, query)
             error("Druid query execution failed with status $(err.status)")
         end
     end
-    jsontable(response.body)
+    parser(response.body)
 end
 
 end # module
