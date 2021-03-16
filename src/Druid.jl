@@ -54,7 +54,7 @@ julia> execute(client, "SELECT * FROM some_datasource LIMIT 10")
 JSONTables.Table{...
 
 julia> execute(client, "SELECT * FROM non_existent_datasource")
-Druid error during query execution
+ERROR: Druid error during query execution
 Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException","host" => nothing,"error" => "Unknown exception","errorMessage" => "org.apache.calcite.runtime.CalciteContextException: From line 1, column 15 to line 1, column 23: Object 'non_existent_datasource' not found")
 Error status: 5xx
 Stacktrace: ...
