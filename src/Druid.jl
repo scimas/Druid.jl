@@ -54,9 +54,9 @@ julia> execute(client, "SELECT * FROM some_datasource LIMIT 10")
 JSONTables.Table{...
 
 julia> execute(client, "SELECT * FROM non_existent_datasource")
-Failed Query: SELECT * FROM non_existent_datasource
-Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException","host" => nothing,"error" => "Unknown exception","errorMessage" => "org.apache.calcite.runtime.CalciteContextException: From line 1, column 15 to line 1, column 23: Object 'testdata2' not found")
-ERROR: Couldn't execute query
+Druid error during query execution
+Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException","host" => nothing,"error" => "Unknown exception","errorMessage" => "org.apache.calcite.runtime.CalciteContextException: From line 1, column 15 to line 1, column 23: Object 'non_existent_datasource' not found")
+Error status: 5xx
 Stacktrace: ...
 ```
 """
@@ -74,9 +74,9 @@ function execute(client::Client, query; parser=jsontable)
                 try
                     err_message = JSON.parse(String(err.response.body))
                 catch _e
-                    error("Druid error during query execution, error message unavailable\n", "Query: ", query)
+                    error("Druid error during query execution, error message unavailable\n", "Error status: $(err.status)")
                 end
-                error("Druid query execution failed with error:\n", err_message, "\nFailed query: ", query)
+                error("Druid error during query execution\n", err_message, "\nError status: $(err.status)")
             end
             error("Druid query execution failed with status $(err.status)")
         end
