@@ -8,7 +8,7 @@ See also: [Client](@ref), [execute](@ref)
 module Druid
 using URIs:URI
 using HTTP: request, IOError, StatusError
-using JSON: json, parse
+using JSON
 using JSONTables:jsontable
 
 export Client, execute
@@ -64,7 +64,7 @@ function execute(client::Client, query; parser=jsontable)
     post_data = Dict("query" => query)
     local response
     try
-        response = request("POST", client.url, ["Content-Type" => "application/json"], json(post_data))
+        response = request("POST", client.url, ["Content-Type" => "application/json"], JSON.json(post_data))
     catch err
         if isa(err, IOError)
             error("I/O Error during query execution")
@@ -72,7 +72,7 @@ function execute(client::Client, query; parser=jsontable)
             if err.status ÷ 100 == 5
                 local err_message
                 try
-                    err_message = parse(String(err.response.body))
+                    err_message = JSON.parse(String(err.response.body))
                 catch _e
                     error("Druid error during query execution, error message unavailable\n", "Query: ", query)
                 end
