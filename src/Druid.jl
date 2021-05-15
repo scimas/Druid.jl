@@ -61,7 +61,6 @@ function execute(client::Client, query; resultFormat="object", header=false, con
         "context" => context,
         "parameters" => parameters
     )
-    @debug post_data
     local response
     try
         response = request("POST", client.url, ["Content-Type" => "application/json"], JSON.json(post_data))
