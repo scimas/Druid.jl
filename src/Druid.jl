@@ -50,9 +50,7 @@ julia> execute(client, "SELECT * FROM some_datasource LIMIT 10")
 
 julia> execute(client, "SELECT * FROM non_existent_datasource")
 ERROR: Druid error during query execution
-Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException","host" => nothing,"error" => "Unknown exception","errorMessage" => "org.apache.calcite.runtime.CalciteContextException: From line 1, column 15 to line 1, column 23: Object 'non_existent_datasource' not found")
-Error status: 5xx
-Stacktrace: ...
+Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException"...
 ```
 """
 function execute(client::Client, query; resultFormat="object", header=false, context=Dict(), parameters=[])
@@ -71,16 +69,13 @@ function execute(client::Client, query; resultFormat="object", header=false, con
         if isa(err, IOError)
             error("I/O Error during query execution")
         elseif isa(err, StatusError)
-            if err.status ÷ 100 == 5
-                local err_message
-                try
-                    err_message = JSON.parse(String(err.response.body))
-                catch _e
-                    error("Druid error during query execution, error message unavailable\n", "Error status: $(err.status)")
-                end
-                error("Druid error during query execution\n", err_message, "\nError status: $(err.status)")
+            local err_message
+            try
+                err_message = JSON.parse(String(err.response.body))
+            catch
+                error("Druid error during query execution, error message unavailable\n", "Error status: $(err.status)")
             end
-            error("Druid query execution failed with status $(err.status)")
+            error("Druid error during query execution\n", err_message, "\nError status: $(err.status)")
         end
     end
     String(response.body)
