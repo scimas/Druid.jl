@@ -1,17 +1,15 @@
 name = "Druid"
 uuid = "2c0563d7-0cee-41bd-8996-23dbc945b6d9"
 authors = ["Mihir Gadgil <mmgadgil20@gmail.com>"]
-version = "0.1.0"
+version = "0.2.0"
 
 [deps]
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-JSONTables = "b9914132-a727-11e9-1322-f18e41205b0b"
 URIs = "5c2747f8-b7ea-4ff2-ba2e-563bfd36b1d4"
 
 [compat]
 HTTP = "0.9.5"
 JSON = "0.21.1"
-JSONTables = "1.0.1"
 URIs = "1.2.0"
-julia = "1.5"
+julia = "1.5, 1.6"
