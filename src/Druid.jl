@@ -9,7 +9,6 @@ module Druid
 using URIs:URI
 using HTTP: request, IOError, StatusError
 using JSON
-using JSONTables:jsontable
 
 export Client, execute
 
@@ -39,19 +38,15 @@ Client(host, port, endpoint, scheme) =
 Client(url::AbstractString) = Client(URI(url))
 
 """
-    execute(client, query; parser=JSONTables.jsontable)
+    execute(client, query; resultFormat="object", header=false, context=Dict(), parameters=[])
 
-Executes the Druid SQL `query` on the `client::Client`. Returns the query result
-as parsed by the `parser` (a `JSONTable` - compatible with Tables.jl interface -
-by default). Throws exception if query execution fails.
-
-Pass the `String` function as `parser` if the results are needed exactly as
-received from Druid.
+Executes the Druid SQL `query` on the `client::Client`. Returns the query
+results as a String. Throws exception if query execution fails.
 
 #Examples
 ```julia-repl
 julia> execute(client, "SELECT * FROM some_datasource LIMIT 10")
-JSONTables.Table{...
+"[...\\n]"
 
 julia> execute(client, "SELECT * FROM non_existent_datasource")
 ERROR: Druid error during query execution
@@ -60,8 +55,15 @@ Error status: 5xx
 Stacktrace: ...
 ```
 """
-function execute(client::Client, query; parser=jsontable)
-    post_data = Dict("query" => query)
+function execute(client::Client, query; resultFormat="object", header=false, context=Dict(), parameters=[])
+    post_data = Dict(
+        "query" => query,
+        "resultFormat" => resultFormat,
+        "header" => header,
+        "context" => context,
+        "parameters" => parameters
+    )
+    @debug post_data
     local response
     try
         response = request("POST", client.url, ["Content-Type" => "application/json"], JSON.json(post_data))
@@ -81,7 +83,7 @@ function execute(client::Client, query; parser=jsontable)
             error("Druid query execution failed with status $(err.status)")
         end
     end
-    parser(response.body)
+    String(response.body)
 end
 
 end # module
