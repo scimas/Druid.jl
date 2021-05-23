@@ -30,7 +30,7 @@ end
 mutable struct Sql <: Query
 end
 
-query_type(q) = error("Unknown query type. Please implement `query_type` for ", typeof(q))
+query_type(q::Query) = error("Unknown query type. Please implement `query_type` for ", typeof(q))
 query_type(::Timeseries) = "timeseries"
 query_type(::TopN) = "topN"
 query_type(::GroupBy) = "groupBy"
