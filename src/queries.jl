@@ -128,37 +128,18 @@ function do_query(url, post_data)
     String(response.body)
 end
 
-query_type(q::Query) = error("Unknown query type. Please implement `query_type` for ", typeof(q))
-query_type(::Timeseries) = "timeseries"
-query_type(::TopN) = "topN"
-query_type(::GroupBy) = "groupBy"
-query_type(::Scan) = "scan"
-query_type(::Search) = "search"
-query_type(::TimeBoundary) = "timeBoundary"
-query_type(::SegmentMetadata) = "segmentMetadata"
-query_type(::DatasourceMetadata) = "dataSourceMetadata"
-
-function _subshow(io::IO, q::Query)
+function Base.show(io::IO, q::Query)
+    print(io, query_type(q), '(')
     firstprint = true
-    for fname in fieldnames(typeof(q))
-        val = getfield(q, fname)
+    for fname in propertynames(q)
+        val = getproperty(q, fname)
         if !(val === nothing)
-            firstprint || print(", ")
+            firstprint || print(io, ", ")
             if firstprint
                 firstprint = false
             end
-            print(io, fname, '=', repr(val))
+            print(io, fname, '=', repr(val, context=io))
         end
     end
-    print(')')
-end
-
-function Base.show(io::IO, q::Scan)
-    print(io, "Scan(")
-    _subshow(io, q)
-end
-
-function Base.show(io::IO, q::Sql)
-    print(io, "Sql(")
-    _subshow(io, q)
+    print(io, ')')
 end
