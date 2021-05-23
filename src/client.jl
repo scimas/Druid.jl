@@ -10,7 +10,7 @@ Druid queryable host connection information store.
 Do not provide the endpoint, it will be set based on the type of query. For
 example, "druid/v2/sql" for SQL queries and "druid/v2" for all other queries.
 
-#Examples
+# Examples
 ```julia-repl
 julia> client = Client("http://localhost:8888/")
 Client(URI("http://localhost:8888/"))
