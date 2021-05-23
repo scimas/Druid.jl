@@ -11,7 +11,7 @@ using HTTP: request, IOError, StatusError
 using JSON
 
 export Client, execute
-export Scan, Sql
+export Timeseries, Scan, Sql
 export Table, Lookup, Unioned, Inline, QuerySource, INNER, LEFT, Join
 
 abstract type DataSource end

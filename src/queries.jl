@@ -1,19 +1,45 @@
-DataSourceType = Union{AbstractString,Dict{T,U}} where {T<:AbstractString, U}
-IntervalType = Union{AbstractString,Tuple{AbstractString,AbstractString}}
+IntervalType = Union{AbstractString, Tuple{AbstractString,AbstractString}}
+GranularityType = Union{AbstractString, Dict}
 
-abstract type Query end
+query_type(::Type{Query}) = error("Unknown query type")
+query_type(q::T) where T<:Query = query_type(T)
 
 mutable struct Timeseries <: Query
+    dataSource::DataSource
+    intervals::IntervalType
+    granularity::GranularityType
+    filter
+    aggregations
+    postAggregations
+    descending
+    limit
+    context
 end
+
+Timeseries(
+    dataSource, intervals, granularity;
+    filter=nothing, aggregations=nothing, postAggregations=nothing,
+    descending=nothing, limit=nothing, context=nothing
+) = Timeseries(
+        dataSource, intervals, granularity,
+        filter, aggregations, postAggregations,
+        descending, limit, context
+    )
+
+query_type(::Type{Timeseries}) = "timeseries"
 
 mutable struct TopN <: Query
 end
 
+query_type(::Type{TopN}) = "topN"
+
 mutable struct GroupBy <: Query
 end
 
+query_type(::Type{GroupBy}) = "groupBy"
+
 mutable struct Scan <: Query
-    dataSource::DataSourceType
+    dataSource::DataSource
     intervals::IntervalType
     columns
     filter
@@ -33,17 +59,27 @@ Scan(
     batchSize=nothing, context=nothing, legacy=nothing
 ) = Scan(dataSource, intervals, columns, filter, order, limit, offset, resultFormat, batchSize, context, legacy)
 
+query_type(::Type{Scan}) = "scan"
+
 mutable struct Search <: Query
 end
+
+query_type(::Type{Search}) = "search"
 
 mutable struct TimeBoundary <: Query
 end
 
+query_type(::Type{TimeBoundary}) = "timeBoundary"
+
 mutable struct SegmentMetadata <: Query
 end
 
+query_type(::Type{SegmentMetadata}) = "segmentMetadata"
+
 mutable struct DatasourceMetadata <: Query
 end
+
+query_type(::Type{DatasourceMetadata}) = "dataSourceMetadata"
 
 mutable struct Sql <: Query
     query
@@ -56,6 +92,23 @@ end
 Sql(query; parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
     Sql(query, parameters, resultFormat, header, context)
 
+query_type(::Type{Sql}) = "SQL"
+
+function JSON.lower(q::Query)
+    d = Dict()
+    qt = query_type(q)
+    if qt != query_type(Sql)
+        d["queryType"] = qt
+    end
+    for fname ∈ propertynames(q)
+        val = getproperty(q, fname)
+        if !(val === nothing)
+            d[fname] = val
+        end
+    end
+    d
+end
+
 """
     execute(client, query)
 
@@ -63,19 +116,11 @@ Executes the native Druid `query` on the `client::Client`. Returns the query
 results as a String. Throws exception if query execution fails.
 """
 function execute(client::Client, query::Query; pretty=false)
-    post_data = Dict()
-    post_data["queryType"] = query_type(query)
-    for fname ∈ fieldnames(typeof(query))
-        val = getfield(query, fname)
-        if !(val === nothing)
-            post_data[fname] = val
-        end
-    end
     url = joinpath(client.url, "druid/v2")
     if pretty
         url = merge(url, query="pretty")
     end
-    do_query(url, post_data)
+    do_query(url, query)
 end
 
 """
@@ -97,15 +142,8 @@ Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException".
 ```
 """
 function execute(client::Client, query::Sql)
-    post_data = Dict()
-    for fname ∈ fieldnames(Sql)
-        val = getfield(query, fname)
-        if !(val === nothing)
-            post_data[fname] = val
-        end
-    end
     url = joinpath(client.url, "druid/v2/sql")
-    do_query(url, post_data)
+    do_query(url, query)
 end
 
 function do_query(url, post_data)
