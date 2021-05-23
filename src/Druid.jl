@@ -13,6 +13,7 @@ using JSON
 export Client, execute
 
 include("client.jl")
+include("queries.jl")
 
 """
     execute(client, query; resultFormat="object", header=false, context=Dict(), parameters=[])
