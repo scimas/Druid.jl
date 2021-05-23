@@ -17,6 +17,7 @@ abstract type DataSource end
 abstract type Query end
 
 include("client.jl")
+include("datasources.jl")
 include("queries.jl")
 
 end # module
