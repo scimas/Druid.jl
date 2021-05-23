@@ -137,3 +137,28 @@ query_type(::Search) = "search"
 query_type(::TimeBoundary) = "timeBoundary"
 query_type(::SegmentMetadata) = "segmentMetadata"
 query_type(::DatasourceMetadata) = "dataSourceMetadata"
+
+function _subshow(io::IO, q::Query)
+    firstprint = true
+    for fname in fieldnames(typeof(q))
+        val = getfield(q, fname)
+        if !(val === nothing)
+            firstprint || print(", ")
+            if firstprint
+                firstprint = false
+            end
+            print(io, fname, '=', repr(val))
+        end
+    end
+    print(')')
+end
+
+function Base.show(io::IO, q::Scan)
+    print(io, "Scan(")
+    _subshow(io, q)
+end
+
+function Base.show(io::IO, q::Sql)
+    print(io, "Sql(")
+    _subshow(io, q)
+end
