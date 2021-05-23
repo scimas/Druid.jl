@@ -19,7 +19,6 @@ struct QuerySource <: DataSource
     query::Query
 end
 
-abstract type JoinType end
 struct INNER <: JoinType end
 struct LEFT <: JoinType end
 
