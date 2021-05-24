@@ -6,7 +6,7 @@ mutable struct Timeseries <: Query
     intervals::Vector{Interval}
     granularity::Granularity
     filter
-    aggregations::Aggregator
+    aggregations::Vector{Aggregator}
     postAggregations
     descending
     limit
