@@ -14,8 +14,11 @@ export Client, execute
 export Timeseries, Scan, Sql
 export Table, Lookup, Unioned, Inline, QuerySource, INNER, LEFT, Join
 export SimpleGranularity, DurationGranularity, PeriodGranularity, Interval
+export Count, SingleField, StringAgg, Grouping, Filtered
 
 abstract type Granularity end
+abstract type Aggregator end
+abstract type Filter end
 abstract type DataSource end
 abstract type JoinType end
 abstract type Query end
@@ -23,6 +26,7 @@ abstract type Query end
 include("client.jl")
 include("intervals.jl")
 include("granularities.jl")
+include("aggregations.jl")
 include("datasources.jl")
 include("queries.jl")
 
