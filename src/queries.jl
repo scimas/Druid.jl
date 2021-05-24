@@ -1,7 +1,8 @@
-query_type(::Type{Query}) = error("Unknown query type")
-query_type(q::T) where T<:Query = query_type(T)
+JSON.lower(q::Query) = non_nothing_dict(q)
+query_type(q::Query) = q.queryType
 
 mutable struct Timeseries <: Query
+    queryType::String
     dataSource::DataSource
     intervals::Vector{Interval}
     granularity::Granularity
@@ -11,31 +12,25 @@ mutable struct Timeseries <: Query
     descending
     limit
     context
-end
-
-Timeseries(
-    dataSource, intervals, granularity;
-    filter=nothing, aggregations=nothing, postAggregations=nothing,
-    descending=nothing, limit=nothing, context=nothing
-) = Timeseries(
-        dataSource, intervals, granularity,
+    Timeseries(
+        dataSource, intervals, granularity;
+        filter=nothing, aggregations=nothing, postAggregations=nothing,
+        descending=nothing, limit=nothing, context=nothing
+    ) = new(
+        "timeseries", dataSource, intervals, granularity,
         filter, aggregations, postAggregations,
         descending, limit, context
     )
-
-query_type(::Type{Timeseries}) = "timeseries"
+end
 
 mutable struct TopN <: Query
 end
 
-query_type(::Type{TopN}) = "topN"
-
 mutable struct GroupBy <: Query
 end
 
-query_type(::Type{GroupBy}) = "groupBy"
-
 mutable struct Scan <: Query
+    queryType::String
     dataSource::DataSource
     intervals::Vector{Interval}
     columns
@@ -47,58 +42,37 @@ mutable struct Scan <: Query
     batchSize
     context
     legacy
+    Scan(
+        dataSource, intervals;
+        columns=nothing, filter=nothing, order=nothing,
+        limit=nothing, offset=nothing, resultFormat=nothing,
+        batchSize=nothing, context=nothing, legacy=nothing
+    ) = new("scan", dataSource, intervals, columns, filter, order, limit, offset, resultFormat, batchSize, context, legacy)
 end
-
-Scan(
-    dataSource, intervals;
-    columns=nothing, filter=nothing, order=nothing,
-    limit=nothing, offset=nothing, resultFormat=nothing,
-    batchSize=nothing, context=nothing, legacy=nothing
-) = Scan(dataSource, intervals, columns, filter, order, limit, offset, resultFormat, batchSize, context, legacy)
-
-query_type(::Type{Scan}) = "scan"
 
 mutable struct Search <: Query
 end
 
-query_type(::Type{Search}) = "search"
-
 mutable struct TimeBoundary <: Query
 end
-
-query_type(::Type{TimeBoundary}) = "timeBoundary"
 
 mutable struct SegmentMetadata <: Query
 end
 
-query_type(::Type{SegmentMetadata}) = "segmentMetadata"
-
 mutable struct DatasourceMetadata <: Query
 end
 
-query_type(::Type{DatasourceMetadata}) = "dataSourceMetadata"
-
 mutable struct Sql <: Query
-    query
+    query::String
     parameters
     resultFormat
     header
     context
+    Sql(query; parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
+        new(query, parameters, resultFormat, header, context)
 end
 
-Sql(query; parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
-    Sql(query, parameters, resultFormat, header, context)
-
-query_type(::Type{Sql}) = "SQL"
-
-function JSON.lower(q::Query)
-    d = Dict()
-    qt = query_type(q)
-    if qt != query_type(Sql)
-        d["queryType"] = qt
-    end
-    non_nothing_dict(q, d)
-end
+query_type(::Sql) = "SQL"
 
 """
     execute(client, query)
