@@ -10,22 +10,53 @@ using URIs
 using HTTP: request, IOError, StatusError
 using JSON
 
-export Client, execute
-export Timeseries, Scan, Sql
+# Druid connection
+export Client
+
+# Queries
+export execute, Timeseries, Scan, Sql
+
+# DataSources
 export Table, Lookup, Unioned, Inline, QuerySource, INNER, LEFT, Join
+
+# Granularities and Interval
 export SimpleGranularity, DurationGranularity, PeriodGranularity, Interval
+
+# Aggregatioons
 export Count, SingleField, StringAgg, Grouping, Filtered
+
+# Dimension specs
+export DefaultDS, ListFiltered, RegexFiltered, PrefixFiltered, LookupDS, Map, MapLookupDS
+
+# Filters
+export Selector, ColumnComparison, RegexF, AndF, OrF, NotF,
+    JavaScriptF, Contains, InsensitiveContains, Fragment, SearchF, InF, Like,
+    Bound, IntervalF, TrueF
 
 abstract type Granularity end
 abstract type Aggregator end
+abstract type DimensionSpec end
+abstract type SearchQuerySpec end
 abstract type Filter end
 abstract type DataSource end
 abstract type JoinType end
 abstract type Query end
 
+function non_nothing_dict(s, d::Dict)
+    for fname ∈ propertynames(s)
+        val = getproperty(s, fname)
+        if !(val === nothing)
+            d[fname] = val
+        end
+    end
+    d
+end
+
 include("client.jl")
 include("intervals.jl")
 include("granularities.jl")
+include("dimensionspecs.jl")
+include("filters.jl")
 include("aggregations.jl")
 include("datasources.jl")
 include("queries.jl")

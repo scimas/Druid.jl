@@ -5,7 +5,7 @@ mutable struct Timeseries <: Query
     dataSource::DataSource
     intervals::Vector{Interval}
     granularity::Granularity
-    filter
+    filter::Filter
     aggregations::Vector{Aggregator}
     postAggregations
     descending
@@ -39,7 +39,7 @@ mutable struct Scan <: Query
     dataSource::DataSource
     intervals::Vector{Interval}
     columns
-    filter
+    filter::Filter
     order
     limit
     offset
@@ -97,13 +97,7 @@ function JSON.lower(q::Query)
     if qt != query_type(Sql)
         d["queryType"] = qt
     end
-    for fname ∈ propertynames(q)
-        val = getproperty(q, fname)
-        if !(val === nothing)
-            d[fname] = val
-        end
-    end
-    d
+    non_nothing_dict(q, d)
 end
 
 """
