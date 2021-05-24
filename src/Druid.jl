@@ -51,6 +51,7 @@ function non_nothing_dict(s, d::Dict)
     end
     d
 end
+non_nothing_dict(s) = non_nothing_dict(s, Dict())
 
 include("client.jl")
 include("intervals.jl")

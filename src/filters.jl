@@ -1,120 +1,108 @@
-JSON.lower(::Filter) = error("Unknown Filter")
-JSON.lower(::SearchQuerySpec) = error("Unknown SearchQuerySpec")
+JSON.lower(f::Filter) = non_nothing_dict(f)
+JSON.lower(sqs::SearchQuerySpec) = non_nothing_dict(sqs)
 
 struct Selector <: Filter
+    type::String
     dimension::String
     value::String
+    Selector(dimension, value) = new("selector", dimension, value)
 end
 
-JSON.lower(f::Selector) = Dict("type" => "selector", "dimension" => f.dimension, "value" => f.value)
-
 struct ColumnComparison <: Filter
+    type::String
     dimensions::Tuple{DimensionSpec, DimensionSpec}
+    ColumnComparison(dimensions) = new("columnComparison", dimensions)
 end
 
 ColumnComparison(dim1, dim2) = ColumnComparison((dim1, dim2))
 
-JSON.lower(f::ColumnComparison) = Dict("type" => "columnComparison", "dimensions" => f.dimensions)
-
 struct RegexF <: Filter
+    type::String
     dimension::String
     pattern::String
+    RegexF(dimension, pattern) = new("regex", dimension, pattern)
 end
-
-JSON.lower(f::RegexF) = Dict("type" => "regex", "dimension" => f.dimension, "pattern" => f.pattern)
 
 struct AndF <: Filter
-    filters::Vector{Filter}
+    type::String
+    fields::Vector{Filter}
+    AndF(filters) = new("and", filters)
 end
-
-JSON.lower(f::AndF) = Dict("type" => "and", "fields" => f.filters)
 
 struct OrF <: Filter
-    filters::Vector{Filter}
+    type::String
+    fields::Vector{Filter}
+    OrF(filters) = new("or", filters)
 end
-
-JSON.lower(f::OrF) = Dict("type" => "or", "fields" => f.filters)
 
 struct NotF <: Filter
-    filter::Filter
+    type::String
+    field::Filter
+    NotF(filter) = new("not", filter)
 end
-
-JSON.lower(f::NotF) = Dict("type" => "not", "field" => f.filter)
 
 struct JavaScriptF <: Filter
+    type::String
     dimension::String
     jsfunction::String
+    JavaScriptF(dimension, jsfunction) = new("javascript", dimension, jsfunction)
 end
 
-JSON.lower(f::JavaScriptF) = Dict("type" => "javascript", "dimension" => f.dimension, "function" => f.jsfunction)
+JSON.lower(f::JavaScriptF) = Dict("type" => f.type, "dimension" => f.dimension, "function" => f.jsfunction)
 
 struct Contains <: SearchQuerySpec
+    type::String
     value::String
     caseSensitive
     function Contains(value; case_sensitive=nothing)
         case_sensitive === nothing || isa(case_sensitive, Bool) || error("case_sensitive must be a Bool")
-        new(value, case_sensitive)
+        new("contains", value, case_sensitive)
     end
 end
 
-function JSON.lower(sqs::Contains)
-    d = Dict()
-    d["type"] = "contains"
-    non_nothing_dict(sqs, d)
-end
-
 struct InsensitiveContains <: SearchQuerySpec
+    type::String
     value::String
+    InsensitiveContains(value) = new("insensitive_contains", value)
 end
-
-JSON.lower(sqs::InsensitiveContains) = Dict("type" => "insensitive_contains", "value" => sqs.value)
 
 struct Fragment <: SearchQuerySpec
+    type::String
     value::String
     caseSensitive
     function Fragment(value; case_sensitive=nothing)
         case_sensitive === nothing || isa(case_sensitive, Bool) || error("case_sensitive must be a Bool")
-        new(value, case_sensitive)
+        new("fragment", value, case_sensitive)
     end
 end
 
-function JSON.lower(sqs::Fragment)
-    d = Dict()
-    d["type"] = "fragment"
-    non_nothing_dict(sqs, d)
-end
-
 struct SearchF <: Filter
+    type::String
     dimension::String
     query::SearchQuerySpec
+    SearchF(dimension, query) = new("search", dimension, query)
 end
-
-JSON.lower(f::SearchF) = Dict("type" => "search", "dimension" => f.dimension, "query" => f.query)
 
 struct InF <: Filter
+    type::String
     dimension::String
     values::Vector
+    InF(dimension, values) = new("in", dimension, values)
 end
 
-JSON.lower(f::InF) = Dict("type" => "in", "dimension" => f.dimension, "values" => f.values)
-
 struct Like <: Filter
+    type::String
     dimension::String
     pattern::String
     escape
     function Like(dimension, pattern; escape=nothing)
         escape === nothing || isa(escape, AbstractString) || error("escape must be a String")
-        new(dimension, pattern, escape)
+        new("like", dimension, pattern, escape)
     end
 end
 
-function JSON.lower(f::Like)
-    d = Dict()
-    d["type"] = "like"
-    non_nothing_dict(f, d)
-end
-
 struct Bound <: Filter
+    type::String
     dimension::String
     lower
     upper
@@ -128,24 +116,18 @@ struct Bound <: Filter
         lowerStrict === nothing || isa(lowerStrict, Bool) || error("lowerStrict must be a Bool")
         upperStrict === nothing || isa(upperStrict, Bool) || error("upperStrict must be a Bool")
         ordering === nothing || isa(ordering, String) || error("ordering must be a String")
-        new(dimension, lower, upper, lowerStrict, upperStrict, ordering)
+        new("bound", dimension, lower, upper, lowerStrict, upperStrict, ordering)
     end
 end
 
-function JSON.lower(f::Bound)
-    d = Dict()
-    d["type"] = "bound"
-    non_nothing_dict(f, d)
-end
-
 struct IntervalF <: Filter
+    type::String
     dimension::String
     intervals::Vector{Interval}
+    IntervalF(dimension, intervals) = new("interval", dimension, intervals)
 end
-
-JSON.lower(f::IntervalF) = Dict("type" => "interval", "dimension" => f.dimension, "intervals" => f.intervals)
 
 struct TrueF <: Filter
+    type::String
+    TrueF() = new("true")
 end
-
-JSON.lower(f::TrueF) = Dict("type" => "true")

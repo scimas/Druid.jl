@@ -1,10 +1,10 @@
-JSON.lower(::Aggregator) = error("Unknown Aggregator")
+JSON.lower(a::Aggregator) = non_nothing_dict(a)
 
 struct Count <: Aggregator
+    type::String
     name::String
+    Count(name) = new("count", name)
 end
-
-JSON.lower(a::Count) = non_nothing_dict(a, Dict{Any, Any}("type" => "count"))
 
 struct SingleField <: Aggregator
     type::String
@@ -24,8 +24,6 @@ struct SingleField <: Aggregator
     end
 end
 
-JSON.lower(a::SingleField) = non_nothing_dict(a, Dict())
-
 struct StringAgg <: Aggregator
     type::String
     fieldName::String
@@ -41,18 +39,16 @@ end
 
 StringAgg(type, of, as; maxStringBytes=nothing) = StringAgg(type, of, as, maxStringBytes)
 
-JSON.lower(a::StringAgg) = non_nothing_dict(a, Dict())
-
 struct Grouping <: Aggregator
+    type::String
     groupings::Vector{String}
     name::String
+    Grouping(groupings, name) = new("grouping", groupings, name)
 end
-
-JSON.lower(a::Grouping) = non_nothing_dict(a, Dict{Any, Any}("type" => "grouping"))
 
 struct Filtered <: Aggregator
+    type::String
     filter::Filter
     aggregator::Aggregator
+    Aggregator(filter, aggregator) = new("filtered", filter, aggregator)
 end
-
-JSON.lower(a::Filtered) = non_nothing_dict(a, Dict{Any, Any}("type" => "filtered"))

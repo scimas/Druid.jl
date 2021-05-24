@@ -1,22 +1,32 @@
 struct Table <: DataSource
+    type::String
     name::String
+    Table(name) = new("table", name)
 end
 
 struct Lookup <: DataSource
-    name::String
+    type::String
+    lookup::String
+    Lookup(name) = new("lookup", name)
 end
 
 struct Unioned <: DataSource
-    names::Vector{String}
+    type::String
+    dataSources::Vector{String}
+    Unioned(names) = new("union", names)
 end
 
 struct Inline <: DataSource
-    columns::Vector{String}
+    type::String
+    columnNames::Vector{String}
     rows::Vector{Vector{Any}}
+    Inline(column_names, rows) = new("inline", column_names, rows)
 end
 
 struct QuerySource <: DataSource
+    type::String
     query::Query
+    QuerySource(query) = new("query", query)
 end
 
 struct INNER <: JoinType end
@@ -27,21 +37,13 @@ JSON.lower(::INNER) = "INNER"
 JSON.lower(::LEFT) = "LEFT"
 
 struct Join <: DataSource
+    type::String
     left::Union{Table, Lookup, Inline, QuerySource, Join}
     right::Union{Lookup, Inline, QuerySource}
     rightPrefix::String
     condition::String
     joinType::JoinType
+    Join(left, right, rightPrefix, condition, joinType) = new("join", left, right, rightPrefix, condition, joinType)
 end
 
-JSON.lower(d::DataSource) = error("Unknown DataSource ", typeof(d), ". Implement JSON.lower for it.")
-JSON.lower(t::Table) = Dict("type" => "table", "name" => t.name)
-JSON.lower(l::Lookup) = Dict("type" => "lookup", "lookup" => l.name)
-JSON.lower(u::Unioned) = Dict("type" => "union", "dataSources" => u.names)
-JSON.lower(i::Inline) = Dict("type" => "inline", "columnNames" => i.columns, "rows" => i.rows)
-JSON.lower(q::QuerySource) = Dict("type" => "query", "query" => q.query)
-JSON.lower(j::Join) = Dict(
-    "type" => "join",
-    "left" => j.left, "right" => j.right, "rightPrefix" => j.rightPrefix,
-    "condition" => j.condition, "joinType" => j.joinType
-)
+JSON.lower(d::DataSource) = non_nothing_dict(d)

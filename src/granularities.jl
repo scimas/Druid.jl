@@ -1,4 +1,4 @@
-JSON.lower(::Granularity) = error("Unknown granularity")
+JSON.lower(g::Granularity) = non_nothing_dict(g)
 
 struct SimpleGranularity <: Granularity
     name::String
@@ -24,13 +24,14 @@ Specifying origin is not required (defaults to Druid's default), but should be a
 ISO8601 datetime string if you do specify it.
 """
 struct DurationGranularity <: Granularity
+    type::String
     duration::UInt64
     origin
+    function DurationGranularity(duration; origin=nothing)
+        origin === nothing || isa(origin, String) || error("origin must be a String")
+        new("duration", duration, origin)
+    end
 end
-
-DurationGranularity(duration; origin=nothing) = DurationGranularity(duration, origin)
-
-JSON.lower(dg::DurationGranularity) = non_nothing_dict(dg, Dict{Any, Any}("type" => "duration"))
 
 """
     PeriodGranularity(period::String; origin, timezone)
@@ -44,11 +45,13 @@ timezone should be one of those [supported by
 Druid](https://druid.apache.org/docs/latest/querying/granularities.html#supported-time-zones).
 """
 struct PeriodGranularity <: Granularity
+    type::String
     period::String
     origin
     timeZone
+    function PeriodGranularity(period; origin=nothing, timezone=nothing)
+        origin === nothing || isa(origin, String) || error("origin must be a String")
+        timezone === nothing || isa(timezone, String) || error("timezone must be a String")
+        new("period", period, origin, timezone)
+    end
 end
-
-PeriodGranularity(period; origin=nothing, timezone=nothing) = PeriodGranularity(period, origin, timezone)
-
-JSON.lower(pg::PeriodGranularity) = non_nothing_dict(pg, Dict{Any, Any}("type" => "period"))
