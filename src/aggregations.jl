@@ -1,10 +1,10 @@
 JSON.lower(::Aggregator) = error("Unknown Aggregator")
 
 struct Count <: Aggregator
-    as::String
+    name::String
 end
 
-JSON.lower(a::Count) = Dict("type" => "count", "name" => a.as)
+JSON.lower(a::Count) = non_nothing_dict(a, Dict{Any, Any}("type" => "count"))
 
 struct SingleField <: Aggregator
     type::String
@@ -41,27 +41,18 @@ end
 
 StringAgg(type, of, as; maxStringBytes=nothing) = StringAgg(type, of, as, maxStringBytes)
 
-function JSON.lower(a::StringAgg)
-    d = Dict()
-    d["type"] = a.type
-    d["fieldName"] = a.fieldName
-    d["name"] = a.name
-    if !(a.maxStringBytes === nothing)
-        d["maxStringBytes"] = a.maxStringBytes
-    end
-    d
-end
+JSON.lower(a::StringAgg) = non_nothing_dict(a, Dict())
 
 struct Grouping <: Aggregator
     groupings::Vector{String}
-    as::String
+    name::String
 end
 
-JSON.lower(a::Grouping) = Dict("type" => "grouping", "name" => a.as, "groupings" => a.groupings)
+JSON.lower(a::Grouping) = non_nothing_dict(a, Dict{Any, Any}("type" => "grouping"))
 
 struct Filtered <: Aggregator
     filter::Filter
     aggregator::Aggregator
 end
 
-JSON.lower(a::Filtered) = Dict("type" => "filtered", "filter" => a.filter, "aggregator" => a.aggregator)
+JSON.lower(a::Filtered) = non_nothing_dict(a, Dict{Any, Any}("type" => "filtered"))
