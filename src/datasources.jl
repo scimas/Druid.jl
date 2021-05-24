@@ -22,7 +22,7 @@ end
 struct INNER <: JoinType end
 struct LEFT <: JoinType end
 
-JSON.lower(j::JoinType) = error("Unknowns JoinType ", typeof(j), ". Implement JSON.lower for it.")
+JSON.lower(::JoinType) = error("Unknown JoinType")
 JSON.lower(::INNER) = "INNER"
 JSON.lower(::LEFT) = "LEFT"
 
