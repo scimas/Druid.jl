@@ -1,13 +1,10 @@
-IntervalType = Union{AbstractString, Tuple{AbstractString,AbstractString}}
-GranularityType = Union{AbstractString, Dict}
-
 query_type(::Type{Query}) = error("Unknown query type")
 query_type(q::T) where T<:Query = query_type(T)
 
 mutable struct Timeseries <: Query
     dataSource::DataSource
-    intervals::IntervalType
-    granularity::GranularityType
+    intervals::Vector{Interval}
+    granularity::Granularity
     filter
     aggregations
     postAggregations
@@ -40,7 +37,7 @@ query_type(::Type{GroupBy}) = "groupBy"
 
 mutable struct Scan <: Query
     dataSource::DataSource
-    intervals::IntervalType
+    intervals::Vector{Interval}
     columns
     filter
     order
