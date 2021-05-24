@@ -24,6 +24,8 @@ struct SingleField <: Aggregator
     end
 end
 
+JSON.lower(a::SingleField) = non_nothing_dict(a, Dict())
+
 struct StringAgg <: Aggregator
     type::String
     fieldName::String
