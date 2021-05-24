@@ -30,15 +30,7 @@ end
 
 DurationGranularity(duration; origin=nothing) = DurationGranularity(duration, origin)
 
-function JSON.lower(dg::DurationGranularity)
-    d = Dict()
-    d["type"] = "duration"
-    d["duration"] = dg.duration
-    if !(dg.origin === nothing)
-        d["origin"] = dg.origin
-    end
-    d
-end
+JSON.lower(dg::DurationGranularity) = non_nothing_dict(dg, Dict{Any, Any}("type" => "duration"))
 
 """
     PeriodGranularity(period::String; origin, timezone)
@@ -54,20 +46,9 @@ Druid](https://druid.apache.org/docs/latest/querying/granularities.html#supporte
 struct PeriodGranularity <: Granularity
     period::String
     origin
-    timezone
+    timeZone
 end
 
 PeriodGranularity(period; origin=nothing, timezone=nothing) = PeriodGranularity(period, origin, timezone)
 
-function JSON.lower(pg::PeriodGranularity)
-    d = Dict()
-    d["type"] = "period"
-    d["period"] = pg.period
-    if !(pg.origin === nothing)
-        d["origin"] = pg.origin
-    end
-    if !(pg.timezone === nothing)
-        d["timeZone"] = pg.timezone
-    end
-    d
-end
+JSON.lower(pg::PeriodGranularity) = non_nothing_dict(pg, Dict{Any, Any}("type" => "period"))
