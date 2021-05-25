@@ -44,6 +44,7 @@ abstract type SearchQuerySpec end
 abstract type Filter end
 abstract type DataSource end
 abstract type JoinType end
+abstract type TopNMetricSpec end
 abstract type Query end
 
 function non_nothing_dict(s, d::Dict)

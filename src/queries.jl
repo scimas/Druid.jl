@@ -1,5 +1,6 @@
 JSON.lower(q::Query) = non_nothing_dict(q)
 query_type(q::Query) = q.queryType
+JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
 
 mutable struct Timeseries <: Query
     queryType::String
@@ -31,7 +32,59 @@ mutable struct Timeseries <: Query
     end
 end
 
+struct Numeric <: TopNMetricSpec
+    type::String
+    metric::String
+    Numeric(metric) = new("metric", metric)
+end
+
+struct Dimension <: TopNMetricSpec
+    type::String
+    ordering
+    previousStop
+    function Dimension(; ordering=nothing, previousStop=nothing)
+        ordering === nothing || lowercase(ordering) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid ordering")
+        previousStop === nothing || typeassert(previousStop, String)
+        new("dimension", ordering, previousStop)
+    end
+end
+
+struct Inverted <: TopNMetricSpec
+    type::String
+    metric::TopNMetricSpec
+    Inverted(metric) = new("inverted", metric)
+end
+
 mutable struct TopN <: Query
+    queryType::String
+    dataSource::DataSource
+    intervals::Vector{Interval}
+    granularity::Granularity
+    dimension::DimensionSpec
+    threshold::UInt64
+    metric::TopNMetricSpec
+    aggregations
+    postAggregations
+    filter
+    context
+    function TopN(
+        dataSource, intervals, granularity, dimension, threshold, metric;
+        aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
+    )
+        aggregations === nothing || typeassert(aggregations, Vector{Aggregator})
+        postAggregations === nothing || typeassert(postAggregations, Vector{PostAggregator})
+        filter === nothing || typeassert(filter, Filter)
+        context === nothing || typeassert(context, Dict)
+        if !isa(metric, Numeric) && !(isa(metric, Inverted) && isa(metric.metric, Numeric))
+            if !(aggregations === nothing) || !(postAggregations === nothing)
+                error("Aggregations and post aggregations can only be specified for Numeric metric specs")
+            end
+        end
+        new(
+            "topN", dataSource, intervals, granularity, dimension, threshold, metric,
+            aggregations, postAggregations, filter, context
+        )
+    end
 end
 
 mutable struct GroupBy <: Query
