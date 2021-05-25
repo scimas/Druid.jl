@@ -168,7 +168,7 @@ mutable struct Search <: Query
         sort === nothing || lowercase(sort) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid sort value")
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         nothing_or_type(context, Dict)
-        new("search", dataSource, intervals, query, granularity, filter, sort, limit, context)
+        new("search", dataSource, intervals, query, granularity, filter, Dict("type" => sort), limit, context)
     end
 end
 Search(
