@@ -96,7 +96,7 @@ mutable struct TopN <: Query
     end
 end
 TopN(
-    dataSource, intervals, granularity, dimension, threshold, metric;
+    ;dataSource, intervals, granularity, dimension, threshold, metric,
     aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
 ) = TopN(
     dataSource, intervals, granularity, dimension, threshold, metric;
@@ -138,7 +138,7 @@ mutable struct Scan <: Query
     end
 end
 Scan(
-    dataSource, intervals;
+    ;dataSource, intervals,
     columns=nothing, filter=nothing, order=nothing,
     limit=nothing, offset=nothing, resultFormat=nothing,
     batchSize=nothing, context=nothing, legacy=nothing
@@ -150,7 +150,34 @@ Scan(
 )
 
 mutable struct Search <: Query
+    queryType::String
+    dataSource::DataSource
+    intervals::Vector{Interval}
+    query::SearchQuerySpec
+    granularity
+    filter
+    sort
+    limit
+    context
+    function Search(
+        dataSource, intervals, query;
+        granularity=nothing, filter=nothing, sort=nothing, limit=nothing, context=nothing
+    )
+        nothing_or_type(granularity, Granularity)
+        nothing_or_type(filter, Filter)
+        sort === nothing || lowercase(sort) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid sort value")
+        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
+        nothing_or_type(context, Dict)
+        new("search", dataSource, intervals, query, granularity, filter, sort, limit, context)
+    end
 end
+Search(
+    ;dataSource, intervals, query,
+    granularity=nothing, filter=nothing, sort=nothing, limit=nothing, context=nothing
+) = Search(
+    dataSource, intervals, query;
+    granularity, filter, sort, limit, context
+)
 
 mutable struct TimeBoundary <: Query
 end
