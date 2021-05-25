@@ -55,7 +55,7 @@ struct Contains <: SearchQuerySpec
     value::String
     caseSensitive
     function Contains(value; case_sensitive=nothing)
-        case_sensitive === nothing || typeassert(case_sensitive, Bool)
+        nothing_or_type(case_sensitive, Bool)
         new("contains", value, case_sensitive)
     end
 end
@@ -71,7 +71,7 @@ struct Fragment <: SearchQuerySpec
     value::String
     caseSensitive
     function Fragment(value; case_sensitive=nothing)
-        case_sensitive === nothing || typeassert(case_sensitive, Bool)
+        nothing_or_type(case_sensitive, Bool)
         new("fragment", value, case_sensitive)
     end
 end
@@ -96,7 +96,7 @@ struct Like <: Filter
     pattern::String
     escape
     function Like(dimension, pattern; escape=nothing)
-        escape === nothing || typeassert(escape, AbstractString)
+        nothing_or_type(escape, AbstractString)
         new("like", dimension, pattern, escape)
     end
 end
@@ -110,12 +110,12 @@ struct Bound <: Filter
     upperStrict
     ordering
     function Bound(dimension; lower=nothing, upper=nothing, lowerStrict=nothing, upperStrict=nothing, ordering=nothing)
-        lower === nothing || typeassert(lower, String)
-        upper === nothing || typeassert(upper, String)
+        nothing_or_type(lower, String)
+        nothing_or_type(upper, String)
         lower === upper === nothing && error("At least one of lower and upper must be specified")
-        lowerStrict === nothing || typeassert(lowerStrict, Bool)
-        upperStrict === nothing || typeassert(upperStrict, Bool)
-        ordering === nothing || typeassert(ordering, String)
+        nothing_or_type(lowerStrict, Bool)
+        nothing_or_type(upperStrict, Bool)
+        nothing_or_type(ordering, String)
         new("bound", dimension, lower, upper, lowerStrict, upperStrict, ordering)
     end
 end

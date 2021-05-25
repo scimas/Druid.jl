@@ -6,12 +6,9 @@ struct DefaultDS <: DimensionSpec
     outputName
     outputType
     function DefaultDS(dimension; outputName=nothing, outputType=nothing)
-        outputName === nothing || typeassert(outputName, String)
-        if !(outputType === nothing)
-            outputType = uppercase(outputType)
-        end
-        outputType === nothing || outputType ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
-        new("default", dimension, outputName, outputType)
+        nothing_or_type(outputName, String)
+        outputType === nothing || uppercase(outputType) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
+        new("default", dimension, outputName, uppercase(outputType))
     end
 end
 
@@ -21,7 +18,7 @@ struct ListFiltered <: DimensionSpec
     values::Vector{String}
     isWhitelist
     function ListFiltered(delegate, values; isWhitelist=nothing)
-        isWhitelist === nothing || typeassert(isWhitelist, Bool)
+        nothing_or_type(isWhitelist, Bool)
         new("listFiltered", delegate, values, isWhitelist)
     end
 end
@@ -46,7 +43,7 @@ struct LookupDS <: DimensionSpec
     name::String
     outputName
     function LookupDS(dimension, name; outputName=nothing)
-        outputName === nothing || typeassert(outputName, String)
+        nothing_or_type(outputName, String)
         new("lookup", dimension, name, outputName)
     end
 end
@@ -67,10 +64,10 @@ struct MapLookupDS <: DimensionSpec
     replaceMissingValueWith
     optimize
     function MapLookupDS(dimension, lookup; outputName=nothing, retainMissingValue=nothing, replaceMissingValueWith=nothing, optimize=nothing)
-        outputName === nothing || typeassert(outputName, String)
-        retainMissingValue === nothing || typeassert(retainMissingValue, Bool)
-        replaceMissingValueWith === nothing || typeassert(replaceMissingValueWith, String)
-        optimize === nothing || typeassert(optimize, Bool)
+        nothing_or_type(outputName, String)
+        nothing_or_type(retainMissingValue, Bool)
+        nothing_or_type(replaceMissingValueWith, String)
+        nothing_or_type(optimize, Bool)
         retainMissingValue != true || !isa(replaceMissingValueWith, String) || error("Cannon specify replaceMissingValueWith when retainMissingValue == true")
         new("lookup", dimension, lookup, outputName, retainMissingValue, replaceMissingValueWith, optimize)
     end
