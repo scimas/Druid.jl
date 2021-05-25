@@ -49,7 +49,7 @@ end
 struct Least <: PostAggregator
     type::String
     name::String
-    fields::Vector{String}
+    fields::Vector{PostAggregator}
     function Least(name, fields, dtype)
         dtype = lowercase(dtype)
         dtype ∈ ["double", "long"] || error("Invalid data type")
