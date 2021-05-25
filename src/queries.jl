@@ -114,6 +114,7 @@ struct OrderByColumn
         new(dimension, direction, dimensionOrder)
     end
 end
+JSON.lower(oc::OrderByColumn) = non_nothing_dict(oc)
 
 struct DefaultLS <: LimitSpec
     type::String
@@ -299,15 +300,37 @@ mutable struct DatasourceMetadata <: Query
 end
 DatasourceMetadata(;dataSource, context=nothing) = DatasourceMetadata(dataSource; context)
 
+struct Parameter
+    type::String
+    value
+    function Parameter(type, value)
+        type ∈ [
+            "CHAR", "VARCHAR",
+            "DECIMAL", "FLOAT", "REAL", "DOUBLE",
+            "BOOLEAN", "TINYINT", "SMALLINT", "INTEGER", "BIGINT",
+            "TIMESTAMP", "DATE", "OTHER"
+        ] || error("Invalid 'type'")
+        new(type, value)
+    end
+end
+JSON.lower(p::Parameter) = non_nothing_dict(p)
+
 mutable struct Sql <: Query
     query::String
     parameters
     resultFormat
     header
     context
-    Sql(query; parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
+    function Sql(query; parameters=nothing, resultFormat=nothing, header=nothing, context=nothing)
+        nothing_or_type(parameters, Vector{Parameter})
+        resultFormat === nothing || resultFormat ∈ ["object", "array", "objectLines", "arrayLines", "csv"] || error("Invalid resultFormat")
+        nothing_or_type(header, Bool)
+        nothing_or_type(context, Dict)
         new(query, parameters, resultFormat, header, context)
+    end
 end
+Sql(;query, parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
+    Sql(query; parameters, resultFormat, header, context)
 
 query_type(::Sql) = "SQL"
 
