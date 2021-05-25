@@ -58,6 +58,11 @@ function non_nothing_dict(s, d::Dict)
 end
 non_nothing_dict(s) = non_nothing_dict(s, Dict())
 
+function nothing_or_type(var, type)
+    var === nothing || typeassert(var, type)
+    true
+end
+
 include("client.jl")
 include("intervals.jl")
 include("granularities.jl")

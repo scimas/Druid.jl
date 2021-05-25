@@ -18,12 +18,12 @@ mutable struct Timeseries <: Query
         filter=nothing, aggregations=nothing, postAggregations=nothing,
         descending=nothing, limit=nothing, context=nothing
     )
-        filter === nothing || typeassert(filter, Filter)
-        aggregations === nothing || typeassert(aggregations, Vector{Aggregator})
-        postAggregations === nothing || typeassert(postAggregations, Vector{PostAggregator})
-        descending === nothing || typeassert(descending, Bool)
+        nothing_or_type(filter, Filter)
+        nothing_or_type(aggregations, Vector{Aggregator})
+        nothing_or_type(postAggregations, Vector{PostAggregator})
+        nothing_or_type(descending, Bool)
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
-        context === nothing || typeassert(context, Dict)
+        nothing_or_type(context, Dict)
         new(
             "timeseries", dataSource, intervals, granularity,
             filter, aggregations, postAggregations,
@@ -53,8 +53,8 @@ struct Dimension <: TopNMetricSpec
     previousStop
     function Dimension(; ordering=nothing, previousStop=nothing)
         ordering === nothing || lowercase(ordering) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid ordering")
-        previousStop === nothing || typeassert(previousStop, String)
-        new("dimension", ordering, previousStop)
+        nothing_or_type(previousStop, String)
+        new("dimension", lowercar(ordering), previousStop)
     end
 end
 
@@ -80,10 +80,10 @@ mutable struct TopN <: Query
         dataSource, intervals, granularity, dimension, threshold, metric;
         aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
     )
-        aggregations === nothing || typeassert(aggregations, Vector{Aggregator})
-        postAggregations === nothing || typeassert(postAggregations, Vector{PostAggregator})
-        filter === nothing || typeassert(filter, Filter)
-        context === nothing || typeassert(context, Dict)
+        nothing_or_type(aggregations, Vector{Aggregator})
+        nothing_or_type(postAggregations, Vector{PostAggregator})
+        nothing_or_type(filter, Filter)
+        nothing_or_type(context, Dict)
         if !isa(metric, Numeric) && !(isa(metric, Inverted) && isa(metric.metric, Numeric))
             if !(aggregations === nothing) || !(postAggregations === nothing)
                 error("Aggregations and post aggregations can only be specified for Numeric metric specs")
@@ -111,7 +111,7 @@ mutable struct Scan <: Query
     dataSource::DataSource
     intervals::Vector{Interval}
     columns
-    filter::Filter
+    filter
     order
     limit
     offset
@@ -119,13 +119,35 @@ mutable struct Scan <: Query
     batchSize
     context
     legacy
-    Scan(
+    function Scan(
         dataSource, intervals;
         columns=nothing, filter=nothing, order=nothing,
         limit=nothing, offset=nothing, resultFormat=nothing,
         batchSize=nothing, context=nothing, legacy=nothing
-    ) = new("scan", dataSource, intervals, columns, filter, order, limit, offset, resultFormat, batchSize, context, legacy)
+    )
+        nothing_or_type(columns, Vector{String})
+        nothing_or_type(filter, Filter)
+        order === nothing || lowercase(order) ∈ ["ascending", "descending", "none"] || error("Invalid order")
+        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
+        offset === nothing || (isa(offset, Integer) && offset >= 0) || error("offset must be a non-negative integer")
+        resultFormat === nothing || resultFormat ∈ ["list", "compactedList"] || error("Invalid resultFormat")
+        batchSize === nothing || (isa(batchSize, Integer) && batchSize >= 0) || error("batchSize must be a non-negative integer")
+        nothing_or_type(context, Dict)
+        nothing_or_type(legacy, Bool)
+        new("scan", dataSource, intervals, columns, filter, order, limit, offset, resultFormat, batchSize, context, legacy)
+    end
 end
+Scan(
+    dataSource, intervals;
+    columns=nothing, filter=nothing, order=nothing,
+    limit=nothing, offset=nothing, resultFormat=nothing,
+    batchSize=nothing, context=nothing, legacy=nothing
+) = Scan(
+    dataSource, intervals;
+    columns, filter, order,
+    limit, offset, resultFormat,
+    batchSize, context, legacy
+)
 
 mutable struct Search <: Query
 end
