@@ -50,6 +50,14 @@ end
 
 JSON.lower(f::JavaScriptF) = Dict("type" => f.type, "dimension" => f.dimension, "function" => f.jsfunction)
 
+struct ExtractionFilter <: Filter
+    type::String
+    dimension::String
+    value
+    extractionFn::ExtractionFunction
+    ExtractionFilter(dimension, value, extractionFn) = new("extraction", dimension, value, extractionFn)
+end
+
 struct Contains <: SearchQuerySpec
     type::String
     value::String
@@ -80,7 +88,11 @@ struct SearchF <: Filter
     type::String
     dimension::String
     query::SearchQuerySpec
-    SearchF(dimension, query) = new("search", dimension, query)
+    extractionFn
+    function SearchF(dimension, query; extractionFn=nothing)
+        nothing_or_type(extractionFn, ExtractionFunction)
+        new("search", dimension, query, extractionFn)
+    end
 end
 
 struct InF <: Filter
@@ -95,9 +107,11 @@ struct Like <: Filter
     dimension::String
     pattern::String
     escape
-    function Like(dimension, pattern; escape=nothing)
+    extractionFn
+    function Like(dimension, pattern; escape=nothing, extractionFn=nothing)
         nothing_or_type(escape, AbstractString)
-        new("like", dimension, pattern, escape)
+        nothing_or_type(extractionFn, ExtractionFunction)
+        new("like", dimension, pattern, escape, extractionFn)
     end
 end
 
@@ -109,14 +123,16 @@ struct Bound <: Filter
     lowerStrict
     upperStrict
     ordering
-    function Bound(dimension; lower=nothing, upper=nothing, lowerStrict=nothing, upperStrict=nothing, ordering=nothing)
+    extractionFn
+    function Bound(dimension; lower=nothing, upper=nothing, lowerStrict=nothing, upperStrict=nothing, ordering=nothing, extractionFn=nothing)
         nothing_or_type(lower, String)
         nothing_or_type(upper, String)
         lower === upper === nothing && error("At least one of lower and upper must be specified")
         nothing_or_type(lowerStrict, Bool)
         nothing_or_type(upperStrict, Bool)
         nothing_or_type(ordering, String)
-        new("bound", dimension, lower, upper, lowerStrict, upperStrict, ordering)
+        nothing_or_type(extractionFn, ExtractionFunction)
+        new("bound", dimension, lower, upper, lowerStrict, upperStrict, ordering, extractionFn)
     end
 end
 
@@ -124,7 +140,11 @@ struct IntervalF <: Filter
     type::String
     dimension::String
     intervals::Vector{Interval}
-    IntervalF(dimension, intervals) = new("interval", dimension, intervals)
+    extractionFn
+    function IntervalF(dimension, intervals; extractionFn=nothing)
+        nothing_or_type(extractionFn, ExtractionFunction)
+        new("interval", dimension, intervals, extractionFn)
+    end
 end
 
 struct TrueF <: Filter

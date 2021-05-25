@@ -29,12 +29,17 @@ export Count, SingleField, StringAgg, Grouping, Filtered
 export Arithmetic, FieldAccess, FinalizingFieldAccess, ConstantPA, Greatest, Least, JavaScriptPA, HyperUniqueCardinality
 
 # Dimension specs
-export DefaultDS, ListFiltered, RegexFiltered, PrefixFiltered, LookupDS, Map, MapLookupDS
+export DefaultDS, ExtractionDS, ListFiltered, RegexFiltered, PrefixFiltered, LookupDS, Map, MapLookupDS
+
+# ExtractionFunctions
+export RegexEF, PartialEF, SearchQueryEF, SubstringEF, StrlenEF,
+    TimeFormatEF, TimeParseEF, JavaScriptEF, RegisteredLookupEF, InlineLookupEF,
+    CascadeEF, StringFormatEF, UpperEF, LowerEF, BucketEF
 
 # Filters
 export Selector, ColumnComparison, RegexF, AndF, OrF, NotF,
     JavaScriptF, Contains, InsensitiveContains, Fragment, SearchF, InF, Like,
-    Bound, IntervalF, TrueF
+    Bound, IntervalF, TrueF, ExtractionFilter
 
 # Having Filters
 export EqualTo, GreaterThan, LessThan, DimSelector, AndH, OrH, NotH
@@ -51,6 +56,7 @@ Parameter
 abstract type Granularity end
 abstract type Aggregator end
 abstract type PostAggregator end
+abstract type ExtractionFunction end
 abstract type DimensionSpec end
 abstract type SearchQuerySpec end
 abstract type Filter end
