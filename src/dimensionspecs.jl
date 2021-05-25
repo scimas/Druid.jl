@@ -6,7 +6,7 @@ struct DefaultDS <: DimensionSpec
     outputName
     outputType
     function DefaultDS(dimension; outputName=nothing, outputType=nothing)
-        outputName === nothing || isa(outputName, String) || error("outputName must be a String")
+        outputName === nothing || typeassert(outputName, String)
         if !(outputType === nothing)
             outputType = uppercase(outputType)
         end
@@ -21,7 +21,7 @@ struct ListFiltered <: DimensionSpec
     values::Vector{String}
     isWhitelist
     function ListFiltered(delegate, values; isWhitelist=nothing)
-        isWhitelist === nothing || isa(isWhitelist, Bool) || error("isWhitelist must be a Bool")
+        isWhitelist === nothing || typeassert(isWhitelist, Bool)
         new("listFiltered", delegate, values, isWhitelist)
     end
 end
@@ -46,7 +46,7 @@ struct LookupDS <: DimensionSpec
     name::String
     outputName
     function LookupDS(dimension, name; outputName=nothing)
-        outputName === nothing || isa(outputName, String) || error("outputName must be a String")
+        outputName === nothing || typeassert(outputName, String)
         new("lookup", dimension, name, outputName)
     end
 end
@@ -67,10 +67,10 @@ struct MapLookupDS <: DimensionSpec
     replaceMissingValueWith
     optimize
     function MapLookupDS(dimension, lookup; outputName=nothing, retainMissingValue=nothing, replaceMissingValueWith=nothing, optimize=nothing)
-        outputName === nothing || isa(outputName, String) || error("outputName must be a String")
-        retainMissingValue === nothing || isa(retainMissingValue, Bool) || error("retainMissingValue must be a Bool")
-        replaceMissingValueWith === nothing || isa(replaceMissingValueWith, String) || error("replaceMissingValueWith must be a String")
-        optimize === nothing || isa(optimize, Bool) || error("optimize must be a Bool")
+        outputName === nothing || typeassert(outputName, String)
+        retainMissingValue === nothing || typeassert(retainMissingValue, Bool)
+        replaceMissingValueWith === nothing || typeassert(replaceMissingValueWith, String)
+        optimize === nothing || typeassert(optimize, Bool)
         retainMissingValue != true || !isa(replaceMissingValueWith, String) || error("Cannon specify replaceMissingValueWith when retainMissingValue == true")
         new("lookup", dimension, lookup, outputName, retainMissingValue, replaceMissingValueWith, optimize)
     end

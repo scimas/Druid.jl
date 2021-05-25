@@ -28,7 +28,7 @@ struct DurationGranularity <: Granularity
     duration::UInt64
     origin
     function DurationGranularity(duration; origin=nothing)
-        origin === nothing || isa(origin, String) || error("origin must be a String")
+        origin === nothing || typeassert(origin, String)
         new("duration", duration, origin)
     end
 end
@@ -50,8 +50,8 @@ struct PeriodGranularity <: Granularity
     origin
     timeZone
     function PeriodGranularity(period; origin=nothing, timezone=nothing)
-        origin === nothing || isa(origin, String) || error("origin must be a String")
-        timezone === nothing || isa(timezone, String) || error("timezone must be a String")
+        origin === nothing || typeassert(origin, String)
+        timezone === nothing || typeassert(timezone, String)
         new("period", period, origin, timezone)
     end
 end

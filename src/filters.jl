@@ -55,7 +55,7 @@ struct Contains <: SearchQuerySpec
     value::String
     caseSensitive
     function Contains(value; case_sensitive=nothing)
-        case_sensitive === nothing || isa(case_sensitive, Bool) || error("case_sensitive must be a Bool")
+        case_sensitive === nothing || typeassert(case_sensitive, Bool)
         new("contains", value, case_sensitive)
     end
 end
@@ -71,7 +71,7 @@ struct Fragment <: SearchQuerySpec
     value::String
     caseSensitive
     function Fragment(value; case_sensitive=nothing)
-        case_sensitive === nothing || isa(case_sensitive, Bool) || error("case_sensitive must be a Bool")
+        case_sensitive === nothing || typeassert(case_sensitive, Bool)
         new("fragment", value, case_sensitive)
     end
 end
@@ -96,7 +96,7 @@ struct Like <: Filter
     pattern::String
     escape
     function Like(dimension, pattern; escape=nothing)
-        escape === nothing || isa(escape, AbstractString) || error("escape must be a String")
+        escape === nothing || typeassert(escape, AbstractString)
         new("like", dimension, pattern, escape)
     end
 end
@@ -110,12 +110,12 @@ struct Bound <: Filter
     upperStrict
     ordering
     function Bound(dimension; lower=nothing, upper=nothing, lowerStrict=nothing, upperStrict=nothing, ordering=nothing)
-        lower === nothing || isa(lower, String) || error("lower must be a String")
-        upper === nothing || isa(upper, String) || error("upper must be a String")
+        lower === nothing || typeassert(lower, String)
+        upper === nothing || typeassert(upper, String)
         lower === upper === nothing && error("At least one of lower and upper must be specified")
-        lowerStrict === nothing || isa(lowerStrict, Bool) || error("lowerStrict must be a Bool")
-        upperStrict === nothing || isa(upperStrict, Bool) || error("upperStrict must be a Bool")
-        ordering === nothing || isa(ordering, String) || error("ordering must be a String")
+        lowerStrict === nothing || typeassert(lowerStrict, Bool)
+        upperStrict === nothing || typeassert(upperStrict, Bool)
+        ordering === nothing || typeassert(ordering, String)
         new("bound", dimension, lower, upper, lowerStrict, upperStrict, ordering)
     end
 end
