@@ -8,7 +8,7 @@ mutable struct Timeseries <: Query
     granularity::Granularity
     filter::Filter
     aggregations::Vector{Aggregator}
-    postAggregations
+    postAggregations::Vector{PostAggregator}
     descending
     limit
     context
