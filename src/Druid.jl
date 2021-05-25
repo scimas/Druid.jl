@@ -35,6 +35,7 @@ export Selector, ColumnComparison, RegexF, AndF, OrF, NotF,
 
 abstract type Granularity end
 abstract type Aggregator end
+abstract type PostAggregator end
 abstract type DimensionSpec end
 abstract type SearchQuerySpec end
 abstract type Filter end
@@ -59,6 +60,7 @@ include("granularities.jl")
 include("dimensionspecs.jl")
 include("filters.jl")
 include("aggregations.jl")
+include("post_aggregations.jl")
 include("datasources.jl")
 include("queries.jl")
 
