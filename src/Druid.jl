@@ -51,7 +51,7 @@ export Numeric, Dimension, Inverted
 export DefaultLS, OrderByColumn
 
 # SQL Parameter
-Parameter
+export Parameter
 
 abstract type Granularity end
 abstract type Aggregator end
