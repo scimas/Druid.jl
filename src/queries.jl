@@ -289,7 +289,15 @@ SegmentMetadata(
 )
 
 mutable struct DatasourceMetadata <: Query
+    queryType::String
+    dataSource::DataSource
+    context
+    function DatasourceMetadata(dataSource; context=nothing)
+        nothing_or_type(context, Dict)
+        new("dataSourceMetadata", dataSource, context)
+    end
 end
+DatasourceMetadata(;dataSource, context=nothing) = DatasourceMetadata(dataSource; context)
 
 mutable struct Sql <: Query
     query::String
