@@ -31,6 +31,15 @@ mutable struct Timeseries <: Query
         )
     end
 end
+Timeseries(
+    ;dataSource, intervals, granularity,
+    filter=nothing, aggregations=nothing, postAggregations=nothing,
+    descending=nothing, limit=nothing, context=nothing
+) = Timeseries(
+    dataSource, intervals, granularity;
+    filter, aggregations, postAggregations,
+    descending, limit, context
+)
 
 struct Numeric <: TopNMetricSpec
     type::String
@@ -86,6 +95,13 @@ mutable struct TopN <: Query
         )
     end
 end
+TopN(
+    dataSource, intervals, granularity, dimension, threshold, metric;
+    aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
+) = TopN(
+    dataSource, intervals, granularity, dimension, threshold, metric;
+    aggregations, postAggregations, filter, context
+)
 
 mutable struct GroupBy <: Query
 end
