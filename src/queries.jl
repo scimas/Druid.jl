@@ -251,7 +251,42 @@ end
 TimeBoundary(;dataSource, bound=nothing, filter=nothing, context=nothing) = TimeBoundary(dataSource; bound, filter, context)
 
 mutable struct SegmentMetadata <: Query
+    queryType::String
+    dataSource::DataSource
+    intervals
+    toInclude
+    merge
+    analysisTypes
+    lenientAggregatorMerge
+    context
+    function SegmentMetadata(
+        dataSource; intervals=nothing, toInclude=nothing, merge=nothing,
+        analysisTypes=nothing, lenientAggregatorMerge=nothing, context=nothing
+    )
+        nothing_or_type(intervals, Vector{Interval})
+        nothing_or_type(toInclude, Union{String, Vector{String}})
+        nothing_or_type(merge, Bool)
+        analysisTypes === nothing || (isa(analysisTypes, Vector{String}) &&
+            all(x ∈ ["cardinality", "minmax", "size", "interval", "timestampSpec", "queryGranularity", "aggregators", "rollup"], analysisTypes)) ||
+            error("Invalid analysisTypes")
+        nothing_or_type(lenientAggregatorMerge, Bool)
+        nothing_or_type(context, Dict)
+        if isa(toInclude, String)
+            toInclude ∈ ["all", "none"] || error("Invalid toInclude")
+            toInclude = Dict("type" => toInclude)
+        else
+            toInclude = Dict("type" => "list", "columns" => toInclude)
+        end
+        new("segmentMetadata", dataSource, intervals, toInclude, merge, analysisTypes, lenientAggregatorMerge, context)
+    end
 end
+SegmentMetadata(
+    ;dataSource, intervals=nothing, toInclude=nothing, merge=nothing,
+    analysisTypes=nothing, lenientAggregatorMerge=nothing, context=nothing
+) = SegmentMetadata(
+    dataSource; intervals, toInclude, merge,
+    analysisTypes, lenientAggregatorMerge, context
+)
 
 mutable struct DatasourceMetadata <: Query
 end
