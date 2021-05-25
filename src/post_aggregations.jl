@@ -20,6 +20,7 @@ struct FieldAccess <: PostAggregator
     fieldName::String
     FieldAccess(name, aggregator) = new("fieldAccess", name, aggregator)
 end
+FieldAccess(aggregator) = FieldAccess(aggregator, aggregator)
 
 struct FinalizingFieldAccess <: PostAggregator
     type::String
@@ -27,6 +28,7 @@ struct FinalizingFieldAccess <: PostAggregator
     fieldName::String
     FinalizingFieldAccess(name, aggregator) = new("finalizingFieldAccess", name, aggregator)
 end
+FinalizingFieldAccess(aggregator) = FinalizingFieldAccess(aggregator, aggregator)
 
 struct ConstantPA <: PostAggregator
     type::String
@@ -73,3 +75,4 @@ struct HyperUniqueCardinality <: PostAggregator
     fieldName::String
     HyperUniqueCardinality(name, field) = new("hyperUniqueCardinality", name, field)
 end
+HyperUniqueCardinality(field) = HyperUniqueCardinality(field, field)
