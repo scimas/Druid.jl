@@ -236,7 +236,19 @@ Search(
 )
 
 mutable struct TimeBoundary <: Query
+    queryType::String
+    dataSource::DataSource
+    bound
+    filter
+    context
+    function TimeBoundary(dataSource; bound=nothing, filter=nothing, context=nothing)
+        bound === nothing || bound ∈ ["minTime", "maxTime"] || error("Invalid bound")
+        nothing_or_type(filter, Filter)
+        nothing_or_type(context, Dict)
+        new("timeBoundary", dataSource, bound, filter, context)
+    end
 end
+TimeBoundary(;dataSource, bound=nothing, filter=nothing, context=nothing) = TimeBoundary(dataSource; bound, filter, context)
 
 mutable struct SegmentMetadata <: Query
 end
