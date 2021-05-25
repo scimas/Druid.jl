@@ -42,9 +42,11 @@ abstract type PostAggregator end
 abstract type DimensionSpec end
 abstract type SearchQuerySpec end
 abstract type Filter end
+abstract type HavingSpec end
 abstract type DataSource end
 abstract type JoinType end
 abstract type TopNMetricSpec end
+abstract type LimitSpec end
 abstract type Query end
 
 function non_nothing_dict(s, d::Dict)
@@ -68,6 +70,7 @@ include("intervals.jl")
 include("granularities.jl")
 include("dimensionspecs.jl")
 include("filters.jl")
+include("having.jl")
 include("aggregations.jl")
 include("post_aggregations.jl")
 include("datasources.jl")

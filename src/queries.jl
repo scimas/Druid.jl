@@ -1,6 +1,7 @@
 JSON.lower(q::Query) = non_nothing_dict(q)
 query_type(q::Query) = q.queryType
 JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
+JSON.lower(ls::LimitSpec) = non_nothing_dict(ls)
 
 mutable struct Timeseries <: Query
     queryType::String
@@ -103,8 +104,63 @@ TopN(
     aggregations, postAggregations, filter, context
 )
 
-mutable struct GroupBy <: Query
+struct OrderByColumn
+    dimension::String
+    direction::String
+    dimensionOrder
+    function OrderByColumn(dimension, direction; dimensionOrder=nothing)
+        direction ∈ ["ascending", "descending"] || error("Invalid direction")
+        dimensionOrder === nothing || lowercase(dimensionOrder) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid dimsionOrder")
+        new(dimension, direction, dimensionOrder)
+    end
 end
+
+struct DefaultLS <: LimitSpec
+    type::String
+    limit
+    offset
+    columns
+    function DefaultLS(;limit=nothing, offset=nothing, columns=nothing)
+        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
+        offset === nothing || (isa(offset, Integer) && offset >= 0) || error("offset must be a non-negative integer")
+        nothing_or_type(columns, Vector{OrderByColumn})
+    end
+end
+
+mutable struct GroupBy <: Query
+    queryType::String
+    dataSource::DataSource
+    dimensions::Vector{DimensionSpec}
+    intervals::Vector{Interval}
+    granularity::Granularity
+    limitSpec
+    having
+    filter
+    aggregations
+    postAggregations
+    subtotalsSpec
+    context
+    function GroupBy(
+        dataSource, dimesnions, intervals, granularity;
+        limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing, postAggregations=nothing, subtotalsSpec=nothing, context=nothing
+    )
+        nothing_or_type(limitSpec, LimitSpec)
+        nothing_or_type(having, Union{HavingSpec, Filter})
+        nothing_or_type(filter, Filter)
+        nothing_or_type(aggregations, Vector{Aggregator})
+        nothing_or_type(postAggregations, Vector{PostAggregator})
+        nothing_or_type(subtotalsSpec, Vector{Vector{String}})
+        nothing_or_type(context, Dict)
+        new("groupBy", dataSource, dimensions, intervals, granularity, limitSpec, having, filter, aggregations, postAggregations, subtotalsSpec, context)
+    end
+end
+GroupBy(
+    ;dataSource, dimesnions, intervals, granularity,
+    limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing, postAggregations=nothing, subtotalsSpec=nothing, context=nothing
+) = GroupBy(
+    dataSource, dimesnions, intervals, granularity;
+    limitSpec, having, filter, aggregations, postAggregations, subtotalsSpec, context
+)
 
 mutable struct Scan <: Query
     queryType::String
