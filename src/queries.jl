@@ -6,21 +6,29 @@ mutable struct Timeseries <: Query
     dataSource::DataSource
     intervals::Vector{Interval}
     granularity::Granularity
-    filter::Filter
-    aggregations::Vector{Aggregator}
-    postAggregations::Vector{PostAggregator}
+    filter
+    aggregations
+    postAggregations
     descending
     limit
     context
-    Timeseries(
+    function Timeseries(
         dataSource, intervals, granularity;
         filter=nothing, aggregations=nothing, postAggregations=nothing,
         descending=nothing, limit=nothing, context=nothing
-    ) = new(
-        "timeseries", dataSource, intervals, granularity,
-        filter, aggregations, postAggregations,
-        descending, limit, context
     )
+        filter === nothing || typeassert(filter, Filter)
+        aggregations === nothing || typeassert(aggregations, Vector{Aggregator})
+        postAggregations === nothing || typeassert(postAggregations, Vector{PostAggregator})
+        descending === nothing || typeassert(descending, Bool)
+        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
+        context === nothing || typeassert(context, Dict)
+        new(
+            "timeseries", dataSource, intervals, granularity,
+            filter, aggregations, postAggregations,
+            descending, limit, context
+        )
+    end
 end
 
 mutable struct TopN <: Query
