@@ -14,7 +14,7 @@ using JSON
 export Client
 
 # Queries
-export execute, Timeseries, Scan, Sql
+export execute, Timeseries, TopN, GroupBy, Scan, Search, TimeBoundary, SegmentMetadata, DatasourceMetadata, Sql
 
 # DataSources
 export Table, Lookup, Unioned, Inline, QuerySource, INNER, LEFT, Join
@@ -35,6 +35,18 @@ export DefaultDS, ListFiltered, RegexFiltered, PrefixFiltered, LookupDS, Map, Ma
 export Selector, ColumnComparison, RegexF, AndF, OrF, NotF,
     JavaScriptF, Contains, InsensitiveContains, Fragment, SearchF, InF, Like,
     Bound, IntervalF, TrueF
+
+# Having Filters
+export EqualTo, GreaterThan, LessThan, DimSelector, AndH, OrH, NotH
+
+# TopN Metric Specs
+export Numeric, Dimension, Inverted
+
+# LimitSpec
+export DefaultLS, OrderByColumn
+
+# SQL Parameter
+Parameter
 
 abstract type Granularity end
 abstract type Aggregator end
