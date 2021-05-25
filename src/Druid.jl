@@ -25,6 +25,9 @@ export SimpleGranularity, DurationGranularity, PeriodGranularity, Interval
 # Aggregatioons
 export Count, SingleField, StringAgg, Grouping, Filtered
 
+# PostAggregations
+export Arithmetic, FieldAccess, FinalizingFieldAccess, ConstantPA, Greatest, Least, JavaScriptPA, HyperUniqueCardinality
+
 # Dimension specs
 export DefaultDS, ListFiltered, RegexFiltered, PrefixFiltered, LookupDS, Map, MapLookupDS
 
