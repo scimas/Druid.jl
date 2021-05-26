@@ -1,5 +1,10 @@
 JSON.lower(g::Granularity) = non_nothing_dict(g)
 
+"""
+    SimpleGranularity(name::String)
+
+One of the simple predefined granularities of Druid.
+"""
 struct SimpleGranularity <: Granularity
     name::String
     function SimpleGranularity(name)
