@@ -1,11 +1,26 @@
 JSON.lower(a::Aggregator) = non_nothing_dict(a)
 
+"""
+    Count(output_name)
+
+Count number of rows.
+"""
 struct Count <: Aggregator
     type::String
     name::String
     Count(name) = new("count", name)
 end
 
+"""
+    SingelField(type, field, output_name)
+
+Apply `type` aggregator to the `field` and get result as `output_name`.
+
+Available `type`s: "longSum", "doubleSum", "floatSum", "longMin", "doubleMin",
+"floatMin", "longMax", "doubleMax", "floatMax", "longFirst", "doubleFirst",
+"floatFirst", "longLast", "doubleLast", "floatLast", "longAny", "doubleAny",
+"floatAny", "doubleMean"
+"""
 struct SingleField <: Aggregator
     type::String
     fieldName::String
@@ -24,6 +39,15 @@ struct SingleField <: Aggregator
     end
 end
 
+"""
+    StringAgg(type, field, output_name; maxStringBytes=nothing)
+
+Apply `type` string aggregator to `field` and get result as `output_name`.
+
+Available `type`s: "first", "last", "any"
+
+See Druid documentation for `maxStringBytes`.
+"""
 struct StringAgg <: Aggregator
     type::String
     fieldName::String
@@ -37,6 +61,11 @@ struct StringAgg <: Aggregator
     end
 end
 
+"""
+    Grouping(groupings, name)
+
+Grouping aggregator
+"""
 struct Grouping <: Aggregator
     type::String
     groupings::Vector{String}
@@ -44,6 +73,11 @@ struct Grouping <: Aggregator
     Grouping(groupings, name) = new("grouping", groupings, name)
 end
 
+"""
+    Filtered(filter, aggregator)
+
+An aggregator that combines a filter with the `aggregator`.
+"""
 struct Filtered <: Aggregator
     type::String
     filter::Filter
