@@ -82,5 +82,5 @@ struct Filtered <: Aggregator
     type::String
     filter::Filter
     aggregator::Aggregator
-    Aggregator(filter, aggregator) = new("filtered", filter, aggregator)
+    Filtered(filter, aggregator) = new("filtered", filter, aggregator)
 end
