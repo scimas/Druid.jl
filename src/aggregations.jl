@@ -29,15 +29,13 @@ struct StringAgg <: Aggregator
     fieldName::String
     name::String
     maxStringBytes
-    function StringAgg(type, of, as, maxStringBytes)
+    function StringAgg(type, of, as; maxStringBytes=nothing)
         type = lowercase(type)
         type ∈ ["first", "last", "any"] || error("Unknown StringAgg aggregation")
         maxStringBytes === nothing || (isa(maxStringBytes, Integer) && maxStringBytes >= 0) || error("maxStringBytes must be a positive integer")
         new("string" * titlecase(type), of, as, maxStringBytes)
     end
 end
-
-StringAgg(type, of, as; maxStringBytes=nothing) = StringAgg(type, of, as, maxStringBytes)
 
 struct Grouping <: Aggregator
     type::String
