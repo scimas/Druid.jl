@@ -53,6 +53,10 @@ export DefaultLS, OrderByColumn
 # SQL Parameter
 export Parameter
 
+# Export abstract types
+export Query, Granularity, Aggregator, PostAggregator, Filter, HavingSpec, DataSource,
+    DimensionSpec, ExtractionFunction, SearchQuerySpec, JoinType, TopNMetricSpec, LimitSpec
+
 abstract type Granularity end
 abstract type Aggregator end
 abstract type PostAggregator end
