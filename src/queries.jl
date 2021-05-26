@@ -3,6 +3,13 @@ query_type(q::Query) = q.queryType
 JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
 JSON.lower(ls::LimitSpec) = non_nothing_dict(ls)
 
+"""
+    Timeseries(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity)
+
+    Timeseries(dataSource, intervals, granularity;
+        filter::Filter, aggregations::Vector{Aggregator}, postAggregations::Vector{PostAggregator},
+        descending::Bool, limit::Integer, context::Dict)
+"""
 mutable struct Timeseries <: Query
     queryType::String
     dataSource::DataSource
@@ -33,7 +40,7 @@ mutable struct Timeseries <: Query
     end
 end
 Timeseries(
-    ;dataSource, intervals, granularity,
+    ; dataSource, intervals, granularity,
     filter=nothing, aggregations=nothing, postAggregations=nothing,
     descending=nothing, limit=nothing, context=nothing
 ) = Timeseries(
@@ -42,12 +49,24 @@ Timeseries(
     descending, limit, context
 )
 
+"""
+    Numeric(metric::String)
+
+Numeric topN metric spec.
+"""
 struct Numeric <: TopNMetricSpec
     type::String
     metric::String
     Numeric(metric) = new("metric", metric)
 end
 
+"""
+    Dimension()
+
+    Dimension(; ordering::String, previousStop::String)
+
+Dimension topN metric spec.
+"""
 struct Dimension <: TopNMetricSpec
     type::String
     ordering
@@ -59,12 +78,24 @@ struct Dimension <: TopNMetricSpec
     end
 end
 
+"""
+    Inverted(metric::TopNMetricSpec)
+
+Inverting topN metric spec.
+"""
 struct Inverted <: TopNMetricSpec
     type::String
     metric::TopNMetricSpec
     Inverted(metric) = new("inverted", metric)
 end
 
+"""
+    TopN(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity,
+        dimension::DimensionSpec, threshold::Uint64, metric::TopNMetricSpec)
+
+    TopN(dataSource, intervals, granularity, dimension, threshold, metric;
+        aggregations::Vector{Aggregator}, postAggregations::Vector{PostAggregator}, filter::Filter, context::Dict)
+"""
 mutable struct TopN <: Query
     queryType::String
     dataSource::DataSource
@@ -97,13 +128,16 @@ mutable struct TopN <: Query
     end
 end
 TopN(
-    ;dataSource, intervals, granularity, dimension, threshold, metric,
+    ; dataSource, intervals, granularity, dimension, threshold, metric,
     aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
 ) = TopN(
     dataSource, intervals, granularity, dimension, threshold, metric;
     aggregations, postAggregations, filter, context
 )
 
+"""
+    OrderByColumn(dimension::String, direction::String; dimensionOrder::String)
+"""
 struct OrderByColumn
     dimension::String
     direction::String
@@ -116,18 +150,31 @@ struct OrderByColumn
 end
 JSON.lower(oc::OrderByColumn) = non_nothing_dict(oc)
 
+"""
+    DefaultLS(; limit::Integer, offset::Integer, columns::Vector{OrderByColumn})
+
+Default limitSpec.
+"""
 struct DefaultLS <: LimitSpec
     type::String
     limit
     offset
     columns
-    function DefaultLS(;limit=nothing, offset=nothing, columns=nothing)
+    function DefaultLS(; limit=nothing, offset=nothing, columns=nothing)
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         offset === nothing || (isa(offset, Integer) && offset >= 0) || error("offset must be a non-negative integer")
         nothing_or_type(columns, Vector{OrderByColumn})
     end
 end
 
+"""
+    GroupBy(dataSource::DataSource, dimesnions::Vector{DimensionSpec}, intervals::Vector{Interval}, granularity::Granularity)
+
+    GroupBy(dataSource, dimesnions, intervals, granularity;
+        limitSpec::LimitSpec, having::HavingSpec, filter::Filter,
+        aggregations::Vector{Aggregator}, postAggregations::Vector{PostAggregator},
+        subtotalsSpec::Vector{Vector{String}}, context::Dict)
+"""
 mutable struct GroupBy <: Query
     queryType::String
     dataSource::DataSource
@@ -143,7 +190,9 @@ mutable struct GroupBy <: Query
     context
     function GroupBy(
         dataSource, dimesnions, intervals, granularity;
-        limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing, postAggregations=nothing, subtotalsSpec=nothing, context=nothing
+        limitSpec=nothing, having=nothing, filter=nothing,
+        aggregations=nothing, postAggregations=nothing,
+        subtotalsSpec=nothing, context=nothing
     )
         nothing_or_type(limitSpec, LimitSpec)
         nothing_or_type(having, Union{HavingSpec, Filter})
@@ -152,17 +201,26 @@ mutable struct GroupBy <: Query
         nothing_or_type(postAggregations, Vector{PostAggregator})
         nothing_or_type(subtotalsSpec, Vector{Vector{String}})
         nothing_or_type(context, Dict)
-        new("groupBy", dataSource, dimensions, intervals, granularity, limitSpec, having, filter, aggregations, postAggregations, subtotalsSpec, context)
+        new("groupBy", dataSource, dimensions, intervals, granularity, limitSpec,
+        having, filter, aggregations, postAggregations, subtotalsSpec, context)
     end
 end
 GroupBy(
-    ;dataSource, dimesnions, intervals, granularity,
+    ; dataSource, dimesnions, intervals, granularity,
     limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing, postAggregations=nothing, subtotalsSpec=nothing, context=nothing
 ) = GroupBy(
     dataSource, dimesnions, intervals, granularity;
     limitSpec, having, filter, aggregations, postAggregations, subtotalsSpec, context
 )
 
+"""
+    Scan(dataSource::DataSource, intervals::Vector{Interval})
+
+    Scan(dataSource, intervals;
+        columns::Vector{String}, filter::Filter, order::String,
+        limit::Integer, offset::Integer, resultFormat::String,
+        batchSize::Integer, context::Dict, legacy::Bool)
+"""
 mutable struct Scan <: Query
     queryType::String
     dataSource::DataSource
@@ -195,7 +253,7 @@ mutable struct Scan <: Query
     end
 end
 Scan(
-    ;dataSource, intervals,
+    ; dataSource, intervals,
     columns=nothing, filter=nothing, order=nothing,
     limit=nothing, offset=nothing, resultFormat=nothing,
     batchSize=nothing, context=nothing, legacy=nothing
@@ -206,6 +264,12 @@ Scan(
     batchSize, context, legacy
 )
 
+"""
+    Search(dataSource::DataSource, intervals::Vector{Interval}, query::SearchQuerySpec)
+
+    Search(dataSource, intervals, query;
+        granularity::Granularity, filter::Filter, sort::String, limit::Integer, context::Dict)
+"""
 mutable struct Search <: Query
     queryType::String
     dataSource::DataSource
@@ -229,13 +293,18 @@ mutable struct Search <: Query
     end
 end
 Search(
-    ;dataSource, intervals, query,
+    ; dataSource, intervals, query,
     granularity=nothing, filter=nothing, sort=nothing, limit=nothing, context=nothing
 ) = Search(
     dataSource, intervals, query;
     granularity, filter, sort, limit, context
 )
 
+"""
+    TimeBoundary(dataSource::DataSource)
+
+    TimeBoundary(dataSource; bound::String, filter::Filter, context::Dict)
+"""
 mutable struct TimeBoundary <: Query
     queryType::String
     dataSource::DataSource
@@ -249,8 +318,14 @@ mutable struct TimeBoundary <: Query
         new("timeBoundary", dataSource, bound, filter, context)
     end
 end
-TimeBoundary(;dataSource, bound=nothing, filter=nothing, context=nothing) = TimeBoundary(dataSource; bound, filter, context)
+TimeBoundary(; dataSource, bound=nothing, filter=nothing, context=nothing) = TimeBoundary(dataSource; bound, filter, context)
 
+"""
+    SegmentMetadata(dataSource::DataSource)
+
+    SegmentMetadata(dataSource; intervals::Vector{Interval}, toInclude::Union{String, Vector{String}},
+        merge::Bool, analysisTypes::Vector{String}, lenientAggregatorMerge::Bool, context::Dict)
+"""
 mutable struct SegmentMetadata <: Query
     queryType::String
     dataSource::DataSource
@@ -282,13 +357,18 @@ mutable struct SegmentMetadata <: Query
     end
 end
 SegmentMetadata(
-    ;dataSource, intervals=nothing, toInclude=nothing, merge=nothing,
+    ; dataSource, intervals=nothing, toInclude=nothing, merge=nothing,
     analysisTypes=nothing, lenientAggregatorMerge=nothing, context=nothing
 ) = SegmentMetadata(
     dataSource; intervals, toInclude, merge,
     analysisTypes, lenientAggregatorMerge, context
 )
 
+"""
+    DatasourceMetadata(dataSource::DataSource)
+
+    DatasourceMetadata(dataSource; context::Dict)
+"""
 mutable struct DatasourceMetadata <: Query
     queryType::String
     dataSource::DataSource
@@ -300,6 +380,12 @@ mutable struct DatasourceMetadata <: Query
 end
 DatasourceMetadata(;dataSource, context=nothing) = DatasourceMetadata(dataSource; context)
 
+"""
+    Parameter(type::String, value)
+
+SQL query parameter, where `type` is one of the Druid SQL data types and `value`
+is the parameter value.
+"""
 struct Parameter
     type::String
     value
@@ -315,6 +401,11 @@ struct Parameter
 end
 JSON.lower(p::Parameter) = non_nothing_dict(p)
 
+"""
+    Sql(query::String)
+
+    Sql(query; parameters::Vector{Parameter}, resultFormat::String, header::Bool, context::Dict)
+"""
 mutable struct Sql <: Query
     query::String
     parameters
@@ -329,7 +420,7 @@ mutable struct Sql <: Query
         new(query, parameters, resultFormat, header, context)
     end
 end
-Sql(;query, parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
+Sql(; query, parameters=nothing, resultFormat=nothing, header=nothing, context=nothing) =
     Sql(query; parameters, resultFormat, header, context)
 
 query_type(::Sql) = "SQL"
