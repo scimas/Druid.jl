@@ -135,6 +135,13 @@ Supertype of all limit specs.
 abstract type LimitSpec end
 
 """
+    VirtualColumn
+
+Supertype of all virtual columns.
+"""
+abstract type VirtualColumn end
+
+"""
     Query
 
 Supertype of all queries.
@@ -151,6 +158,7 @@ include("having.jl")
 include("aggregations.jl")
 include("post_aggregations.jl")
 include("datasources.jl")
+include("virtualcolumns.jl")
 include("queries.jl")
 
 end # module
