@@ -57,18 +57,88 @@ export Parameter
 export Query, Granularity, Aggregator, PostAggregator, Filter, HavingSpec, DataSource,
     DimensionSpec, ExtractionFunction, SearchQuerySpec, JoinType, TopNMetricSpec, LimitSpec
 
+"""
+    Granularity
+
+Supertype of all granularities.
+"""
 abstract type Granularity end
+
+"""
+    Aggregator
+
+Supertype of all aggregators.
+"""
 abstract type Aggregator end
+
+"""
+    PostAggregator
+
+Supertype of all post aggregators.
+"""
 abstract type PostAggregator end
+
+"""
+    ExtractionFunction
+
+Supertype of all extraction functions.
+"""
 abstract type ExtractionFunction end
+
+"""
+    DimensionSpec
+
+Supertype of all dimension specs.
+"""
 abstract type DimensionSpec end
+
+"""
+    SearchQuerySpec
+
+Supertype of all search query specs.
+"""
 abstract type SearchQuerySpec end
+
+"""
+    Filter
+
+Supertype of all filters.
+"""
 abstract type Filter end
+
+"""
+    HavingSpec
+
+Supertype of all having filters.
+"""
 abstract type HavingSpec end
+
+"""
+    DataSource
+
+Supertype of all data sources.
+"""
 abstract type DataSource end
-abstract type JoinType end
+
+"""
+    TopNMetricSpec
+
+Supertype of all topN metric specs.
+"""
 abstract type TopNMetricSpec end
+
+"""
+    LimitSpec
+
+Supertype of all limit specs.
+"""
 abstract type LimitSpec end
+
+"""
+    Query
+
+Supertype of all queries.
+"""
 abstract type Query end
 
 function non_nothing_dict(s, d::Dict)
