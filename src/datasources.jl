@@ -55,24 +55,6 @@ struct QuerySource <: DataSource
 end
 
 """
-    INNER()
-
-INNER join type.
-"""
-struct INNER <: JoinType end
-
-"""
-    LEFT()
-
-LEFT join type.
-"""
-struct LEFT <: JoinType end
-
-JSON.lower(::JoinType) = error("Unknown JoinType")
-JSON.lower(::INNER) = "INNER"
-JSON.lower(::LEFT) = "LEFT"
-
-"""
     Join(left::Union{Table, Lookup, Inline, QuerySource, Join},
         right::Union{Lookup, Inline, QuerySource}, rightPrefix::String,
         condition::String, joinType::JoinType)
@@ -85,8 +67,11 @@ struct Join <: DataSource
     right::Union{Lookup, Inline, QuerySource}
     rightPrefix::String
     condition::String
-    joinType::JoinType
-    Join(left, right, rightPrefix, condition, joinType) = new("join", left, right, rightPrefix, condition, joinType)
+    joinType::String
+    function Join(left, right, rightPrefix, condition, joinType)
+        uppercase(joinType) ∈ ["INNER", "LEFT"] || error("Invalid joinType")
+        new("join", left, right, rightPrefix, condition, uppercase(joinType))
+    end
 end
 
 JSON.lower(d::DataSource) = non_nothing_dict(d)
