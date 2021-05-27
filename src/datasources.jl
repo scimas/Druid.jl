@@ -1,3 +1,5 @@
+JSON.lower(d::DataSource) = non_nothing_dict(d)
+
 """
     Table(name::String)
 
@@ -73,5 +75,3 @@ struct Join <: DataSource
         new("join", left, right, rightPrefix, condition, uppercase(joinType))
     end
 end
-
-JSON.lower(d::DataSource) = non_nothing_dict(d)
