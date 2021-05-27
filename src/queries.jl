@@ -72,9 +72,9 @@ struct Dimension <: TopNMetricSpec
     ordering
     previousStop
     function Dimension(; ordering=nothing, previousStop=nothing)
-        ordering === nothing || lowercase(ordering) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid ordering")
+        ordering === nothing || (ordering = lowercase(ordering)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid ordering")
         nothing_or_type(previousStop, String)
-        new("dimension", lowercar(ordering), previousStop)
+        new("dimension", ordering, previousStop)
     end
 end
 
@@ -144,7 +144,9 @@ struct OrderByColumn
     dimensionOrder
     function OrderByColumn(dimension, direction; dimensionOrder=nothing)
         direction ∈ ["ascending", "descending"] || error("Invalid direction")
-        dimensionOrder === nothing || lowercase(dimensionOrder) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid dimsionOrder")
+        dimensionOrder === nothing ||
+            (dimensionOrder = lowercase(dimensionOrder)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] ||
+            error("Invalid dimsionOrder")
         new(dimension, direction, dimensionOrder)
     end
 end
@@ -242,7 +244,7 @@ mutable struct Scan <: Query
     )
         nothing_or_type(columns, Vector{String})
         nothing_or_type(filter, Filter)
-        order === nothing || lowercase(order) ∈ ["ascending", "descending", "none"] || error("Invalid order")
+        order === nothing || (order = lowercase(order)) ∈ ["ascending", "descending", "none"] || error("Invalid order")
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         offset === nothing || (isa(offset, Integer) && offset >= 0) || error("offset must be a non-negative integer")
         resultFormat === nothing || resultFormat ∈ ["list", "compactedList"] || error("Invalid resultFormat")
@@ -286,7 +288,7 @@ mutable struct Search <: Query
     )
         nothing_or_type(granularity, Granularity)
         nothing_or_type(filter, Filter)
-        sort === nothing || lowercase(sort) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid sort value")
+        sort === nothing || (sort = lowercase(sort)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid sort value")
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         nothing_or_type(context, Dict)
         new("search", dataSource, intervals, query, granularity, filter, Dict("type" => sort), limit, context)

@@ -13,8 +13,8 @@ struct DefaultDS <: DimensionSpec
     outputType
     function DefaultDS(dimension; outputName=nothing, outputType=nothing)
         nothing_or_type(outputName, String)
-        outputType === nothing || uppercase(outputType) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
-        new("default", dimension, outputName, uppercase(outputType))
+        outputType === nothing || (outputType = uppercase(outputType)) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
+        new("default", dimension, outputName, outputType)
     end
 end
 
@@ -31,7 +31,7 @@ struct ExtractionDS <: DimensionSpec
     outputType
     function ExtractionDS(dimension, extractionFn; outputName=nothing, outputType=nothing)
         nothing_or_type(outputName, String)
-        outputType === nothing || uppercase(outputType) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
+        outputType === nothing || (outputType = uppercase(outputType)) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
         new("extraction", dimension, extractionFn, outputName, outputType)
     end
 end
