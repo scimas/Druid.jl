@@ -1,6 +1,11 @@
 JSON.lower(f::Filter) = non_nothing_dict(f)
 JSON.lower(sqs::SearchQuerySpec) = non_nothing_dict(sqs)
 
+"""
+    Selector(dimension::String, value::String)
+
+dimension = value filter.
+"""
 struct Selector <: Filter
     type::String
     dimension::String
@@ -8,6 +13,13 @@ struct Selector <: Filter
     Selector(dimension, value) = new("selector", dimension, value)
 end
 
+"""
+    ColumnComparison(dimensions::Tuple{DimensionSpec, DimensionSpec})
+
+    ColumnComparison(dim1::DimensionSpec, dim2::DimensionSpec)
+
+dimension1 = dimension2 filter.
+"""
 struct ColumnComparison <: Filter
     type::String
     dimensions::Tuple{DimensionSpec, DimensionSpec}
@@ -16,6 +28,11 @@ end
 
 ColumnComparison(dim1, dim2) = ColumnComparison((dim1, dim2))
 
+"""
+    RegexF(dimension::String, pattern::String)
+
+Regex pattern matching filter.
+"""
 struct RegexF <: Filter
     type::String
     dimension::String
@@ -23,24 +40,44 @@ struct RegexF <: Filter
     RegexF(dimension, pattern) = new("regex", dimension, pattern)
 end
 
+"""
+    AndF(filters::Vector{Filter})
+
+Match all `filters`.
+"""
 struct AndF <: Filter
     type::String
     fields::Vector{Filter}
     AndF(filters) = new("and", filters)
 end
 
+"""
+    OrF(filters::Vector{Filter})
+
+Match at least one of the `filters`.
+"""
 struct OrF <: Filter
     type::String
     fields::Vector{Filter}
     OrF(filters) = new("or", filters)
 end
 
+"""
+    NotF(filter::Filter)
+
+Do not match `filter`.
+"""
 struct NotF <: Filter
     type::String
     field::Filter
     NotF(filter) = new("not", filter)
 end
 
+"""
+    JavaScriptF(dimension::String, jsfunction::String)
+
+Filter using a custom JavaScript function.
+"""
 struct JavaScriptF <: Filter
     type::String
     dimension::String
@@ -50,6 +87,11 @@ end
 
 JSON.lower(f::JavaScriptF) = Dict("type" => f.type, "dimension" => f.dimension, "function" => f.jsfunction)
 
+"""
+    ExtractionFilter(dimension::String, value, extractionFn::ExtractionFunction)
+
+Filter to `value` extracted using `extractionFn`.
+"""
 struct ExtractionFilter <: Filter
     type::String
     dimension::String
@@ -58,6 +100,11 @@ struct ExtractionFilter <: Filter
     ExtractionFilter(dimension, value, extractionFn) = new("extraction", dimension, value, extractionFn)
 end
 
+"""
+    Contains(value::String; case_sensitive::Bool)
+
+Search query spec for strings containing `value`.
+"""
 struct Contains <: SearchQuerySpec
     type::String
     value::String
@@ -68,12 +115,22 @@ struct Contains <: SearchQuerySpec
     end
 end
 
+"""
+    InsensitiveContains(value::String)
+
+Case insensitive string contains searhc query spec.
+"""
 struct InsensitiveContains <: SearchQuerySpec
     type::String
     value::String
     InsensitiveContains(value) = new("insensitive_contains", value)
 end
 
+"""
+    Fragment(value::String; case_sensitive::Bool)
+
+Fragment search query spec.
+"""
 struct Fragment <: SearchQuerySpec
     type::String
     value::String
@@ -84,6 +141,11 @@ struct Fragment <: SearchQuerySpec
     end
 end
 
+"""
+    SearchF(dimension::String, query::SearchQuerySpec; extractionFn::ExtractionFunction)
+
+Filter using a query and optionally extraction function.
+"""
 struct SearchF <: Filter
     type::String
     dimension::String
@@ -95,6 +157,11 @@ struct SearchF <: Filter
     end
 end
 
+"""
+    InF(dimension::String, values::Vector)
+
+Filter if value is in `values`.
+"""
 struct InF <: Filter
     type::String
     dimension::String
@@ -102,6 +169,11 @@ struct InF <: Filter
     InF(dimension, values) = new("in", dimension, values)
 end
 
+"""
+    Like(dimension::String, pattern::String; escape::String, extractionFn::ExtractionFunction)
+
+Filter strings matching `pattern`.
+"""
 struct Like <: Filter
     type::String
     dimension::String
@@ -115,6 +187,11 @@ struct Like <: Filter
     end
 end
 
+"""
+    Bound(dimension::String; lower::String, upper::String, lowerStrict::Bool, upperStrict::Bool, ordering::String, extractionFn::ExtractionFunction)
+
+Filter values bounded in a range.
+"""
 struct Bound <: Filter
     type::String
     dimension::String
@@ -136,6 +213,11 @@ struct Bound <: Filter
     end
 end
 
+"""
+    IntervalF(dimension::String, intervals::Vector{Interval}; extractionFn::ExtractionFunction)
+
+Filter by time falling in one of the `intervals`.
+"""
 struct IntervalF <: Filter
     type::String
     dimension::String
@@ -147,6 +229,11 @@ struct IntervalF <: Filter
     end
 end
 
+"""
+    TrueF()
+
+Filter everything.
+"""
 struct TrueF <: Filter
     type::String
     TrueF() = new("true")
