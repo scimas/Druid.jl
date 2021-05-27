@@ -1,5 +1,10 @@
 JSON.lower(pa::PostAggregator) = non_nothing_dict(pa)
 
+"""
+    Arithmetic(name::String, fn::String, fields::Vector{PostAggregator}; ordering::String)
+
+Apply the `fn` aggregation to the `fields`.
+"""
 struct Arithmetic <: PostAggregator
     type::String
     name::String
@@ -14,6 +19,13 @@ struct Arithmetic <: PostAggregator
     end
 end
 
+"""
+    FieldAccess(name::String, aggregator::String)
+
+    FieldAccess(aggregator::String)
+
+Access the `aggregator` and return as `name`.
+"""
 struct FieldAccess <: PostAggregator
     type::String
     name::String
@@ -22,6 +34,13 @@ struct FieldAccess <: PostAggregator
 end
 FieldAccess(aggregator) = FieldAccess(aggregator, aggregator)
 
+"""
+    FinalizingFieldAccess(name::String, aggregator::String)
+
+    FinalizingFieldAccess(aggregator::String)
+
+Access the `aggregator` and return as `name`.
+"""
 struct FinalizingFieldAccess <: PostAggregator
     type::String
     name::String
@@ -30,6 +49,11 @@ struct FinalizingFieldAccess <: PostAggregator
 end
 FinalizingFieldAccess(aggregator) = FinalizingFieldAccess(aggregator, aggregator)
 
+"""
+    ConstantPA(name::String, value::Real)
+
+Return a constant value as `name`.
+"""
 struct ConstantPA <: PostAggregator
     type::String
     name::String
@@ -37,6 +61,12 @@ struct ConstantPA <: PostAggregator
     ConstantPA(name, value) = new("constant", name, value)
 end
 
+"""
+    Greatest(name::String, fields::Vector{PostAggregator}, dtype::String)
+
+Find the largest value per row across the `fields` of type `dtype` (double,
+long) and return as `name`.
+"""
 struct Greatest <: PostAggregator
     type::String
     name::String
@@ -48,6 +78,12 @@ struct Greatest <: PostAggregator
     end
 end
 
+"""
+    Least(name::String, fields::Vector{PostAggregator}, dtype::String)
+
+Find the smallest value per row across the `fields` of type `dtype` (double,
+long) and return as `name`.
+"""
 struct Least <: PostAggregator
     type::String
     name::String
@@ -59,16 +95,29 @@ struct Least <: PostAggregator
     end
 end
 
+"""
+    JavaScriptPA(name::String, fieldNames::Vector{String}, jsfunction::String)
+
+Post aggregate the `fieldNames` aggregators using a custom `jsfunction`
+JavaScript function.
+"""
 struct JavaScriptPA <: PostAggregator
     type::String
     name::String
-    fieldNames::String
+    fieldNames::Vector{String}
     jsfunction::String
     JavaScriptPA(name, fields, jsfunction) = new("javascript", name, fields, jsfunction)
 end
 
 JSON.lower(pa::JavaScriptPA) = Dict("type" => pa.type, "name" => pa.name, "fieldNames" => pa.fieldNames, "function" => pa.jsfunction)
 
+"""
+    HyperUniqueCardinality(name::String, field::String)
+    
+    HyperUniqueCardinality(field::String)
+
+Post aggregator of a hyper unique aggregation.
+"""
 struct HyperUniqueCardinality <: PostAggregator
     type::String
     name::String
