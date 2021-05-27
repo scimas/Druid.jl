@@ -18,35 +18,37 @@ mutable struct Timeseries <: Query
     filter
     aggregations
     postAggregations
+    virtualColumns
     descending
     limit
     context
     function Timeseries(
         dataSource, intervals, granularity;
         filter=nothing, aggregations=nothing, postAggregations=nothing,
-        descending=nothing, limit=nothing, context=nothing
+        virtualColumns=nothing, descending=nothing, limit=nothing, context=nothing
     )
         nothing_or_type(filter, Filter)
         nothing_or_type(aggregations, Vector{Aggregator})
         nothing_or_type(postAggregations, Vector{PostAggregator})
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         nothing_or_type(descending, Bool)
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         nothing_or_type(context, Dict)
         new(
             "timeseries", dataSource, intervals, granularity,
             filter, aggregations, postAggregations,
-            descending, limit, context
+            virtualColumns, descending, limit, context
         )
     end
 end
 Timeseries(
     ; dataSource, intervals, granularity,
     filter=nothing, aggregations=nothing, postAggregations=nothing,
-    descending=nothing, limit=nothing, context=nothing
+    virtualColumns=nothing, descending=nothing, limit=nothing, context=nothing
 ) = Timeseries(
     dataSource, intervals, granularity;
     filter, aggregations, postAggregations,
-    descending, limit, context
+    virtualColumns, descending, limit, context
 )
 
 """
@@ -107,14 +109,16 @@ mutable struct TopN <: Query
     aggregations
     postAggregations
     filter
+    virtualColumns
     context
     function TopN(
         dataSource, intervals, granularity, dimension, threshold, metric;
-        aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
+        aggregations=nothing, postAggregations=nothing, filter=nothing, virtualColumns=nothing, context=nothing
     )
         nothing_or_type(aggregations, Vector{Aggregator})
         nothing_or_type(postAggregations, Vector{PostAggregator})
         nothing_or_type(filter, Filter)
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         nothing_or_type(context, Dict)
         if !isa(metric, Numeric) && !(isa(metric, Inverted) && isa(metric.metric, Numeric))
             if !(aggregations === nothing) || !(postAggregations === nothing)
@@ -123,16 +127,16 @@ mutable struct TopN <: Query
         end
         new(
             "topN", dataSource, intervals, granularity, dimension, threshold, metric,
-            aggregations, postAggregations, filter, context
+            aggregations, postAggregations, filter, virtualColumns, context
         )
     end
 end
 TopN(
     ; dataSource, intervals, granularity, dimension, threshold, metric,
-    aggregations=nothing, postAggregations=nothing, filter=nothing, context=nothing
+    aggregations=nothing, postAggregations=nothing, filter=nothing, virtualColumns=nothing, context=nothing
 ) = TopN(
     dataSource, intervals, granularity, dimension, threshold, metric;
-    aggregations, postAggregations, filter, context
+    aggregations, postAggregations, filter, virtualColumns, context
 )
 
 """
@@ -188,31 +192,34 @@ mutable struct GroupBy <: Query
     filter
     aggregations
     postAggregations
+    virtualColumns
     subtotalsSpec
     context
     function GroupBy(
         dataSource, dimesnions, intervals, granularity;
         limitSpec=nothing, having=nothing, filter=nothing,
         aggregations=nothing, postAggregations=nothing,
-        subtotalsSpec=nothing, context=nothing
+        virtualColumns=nothing, subtotalsSpec=nothing, context=nothing
     )
         nothing_or_type(limitSpec, LimitSpec)
         nothing_or_type(having, Union{HavingSpec, Filter})
         nothing_or_type(filter, Filter)
         nothing_or_type(aggregations, Vector{Aggregator})
         nothing_or_type(postAggregations, Vector{PostAggregator})
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         nothing_or_type(subtotalsSpec, Vector{Vector{String}})
         nothing_or_type(context, Dict)
         new("groupBy", dataSource, dimensions, intervals, granularity, limitSpec,
-        having, filter, aggregations, postAggregations, subtotalsSpec, context)
+        having, filter, aggregations, postAggregations, virtualColumns, subtotalsSpec, context)
     end
 end
 GroupBy(
     ; dataSource, dimesnions, intervals, granularity,
-    limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing, postAggregations=nothing, subtotalsSpec=nothing, context=nothing
+    limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing,
+    postAggregations=nothing, virtualColumns=nothing, subtotalsSpec=nothing, context=nothing
 ) = GroupBy(
     dataSource, dimesnions, intervals, granularity;
-    limitSpec, having, filter, aggregations, postAggregations, subtotalsSpec, context
+    limitSpec, having, filter, aggregations, postAggregations, virtualColumns, subtotalsSpec, context
 )
 
 """
@@ -229,6 +236,7 @@ mutable struct Scan <: Query
     intervals::Vector{Interval}
     columns
     filter
+    virtualColumns
     order
     limit
     offset
@@ -238,12 +246,13 @@ mutable struct Scan <: Query
     legacy
     function Scan(
         dataSource, intervals;
-        columns=nothing, filter=nothing, order=nothing,
+        columns=nothing, filter=nothing, virtualColumns=nothing, order=nothing,
         limit=nothing, offset=nothing, resultFormat=nothing,
         batchSize=nothing, context=nothing, legacy=nothing
     )
         nothing_or_type(columns, Vector{String})
         nothing_or_type(filter, Filter)
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         order === nothing || (order = lowercase(order)) ∈ ["ascending", "descending", "none"] || error("Invalid order")
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         offset === nothing || (isa(offset, Integer) && offset >= 0) || error("offset must be a non-negative integer")
@@ -251,18 +260,17 @@ mutable struct Scan <: Query
         batchSize === nothing || (isa(batchSize, Integer) && batchSize >= 0) || error("batchSize must be a non-negative integer")
         nothing_or_type(context, Dict)
         nothing_or_type(legacy, Bool)
-        new("scan", dataSource, intervals, columns, filter, order, limit, offset, resultFormat, batchSize, context, legacy)
+        new("scan", dataSource, intervals, columns, filter, virtualColumns, order, limit, offset, resultFormat, batchSize, context, legacy)
     end
 end
 Scan(
     ; dataSource, intervals,
-    columns=nothing, filter=nothing, order=nothing,
+    columns=nothing, filter=nothing, virtualColumns=nothing, order=nothing,
     limit=nothing, offset=nothing, resultFormat=nothing,
     batchSize=nothing, context=nothing, legacy=nothing
 ) = Scan(
     dataSource, intervals;
-    columns, filter, order,
-    limit, offset, resultFormat,
+    columns, filter, virtualColumns, order, limit, offset, resultFormat,
     batchSize, context, legacy
 )
 
@@ -279,27 +287,29 @@ mutable struct Search <: Query
     query::SearchQuerySpec
     granularity
     filter
+    virtualColumns
     sort
     limit
     context
     function Search(
         dataSource, intervals, query;
-        granularity=nothing, filter=nothing, sort=nothing, limit=nothing, context=nothing
+        granularity=nothing, filter=nothing, virtualColumns=nothing, sort=nothing, limit=nothing, context=nothing
     )
         nothing_or_type(granularity, Granularity)
         nothing_or_type(filter, Filter)
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         sort === nothing || (sort = lowercase(sort)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid sort value")
         limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
         nothing_or_type(context, Dict)
-        new("search", dataSource, intervals, query, granularity, filter, Dict("type" => sort), limit, context)
+        new("search", dataSource, intervals, query, granularity, filter, virtualColumns, Dict("type" => sort), limit, context)
     end
 end
 Search(
     ; dataSource, intervals, query,
-    granularity=nothing, filter=nothing, sort=nothing, limit=nothing, context=nothing
+    granularity=nothing, filter=nothing, virtualColumns=nothing, sort=nothing, limit=nothing, context=nothing
 ) = Search(
     dataSource, intervals, query;
-    granularity, filter, sort, limit, context
+    granularity, filter, virtualColumns, sort, limit, context
 )
 
 """
@@ -312,15 +322,18 @@ mutable struct TimeBoundary <: Query
     dataSource::DataSource
     bound
     filter
+    virtualColumns
     context
-    function TimeBoundary(dataSource; bound=nothing, filter=nothing, context=nothing)
+    function TimeBoundary(dataSource; bound=nothing, filter=nothing, virtualColumns=nothing, context=nothing)
         bound === nothing || bound ∈ ["minTime", "maxTime"] || error("Invalid bound")
         nothing_or_type(filter, Filter)
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         nothing_or_type(context, Dict)
-        new("timeBoundary", dataSource, bound, filter, context)
+        new("timeBoundary", dataSource, bound, filter, virtualColumns, context)
     end
 end
-TimeBoundary(; dataSource, bound=nothing, filter=nothing, context=nothing) = TimeBoundary(dataSource; bound, filter, context)
+TimeBoundary(; dataSource, bound=nothing, filter=nothing, virtualColumns=nothing, context=nothing) =
+    TimeBoundary(dataSource; bound, filter, virtualColumns, context)
 
 """
     SegmentMetadata(dataSource::DataSource)
@@ -336,10 +349,11 @@ mutable struct SegmentMetadata <: Query
     merge
     analysisTypes
     lenientAggregatorMerge
+    virtualColumns
     context
     function SegmentMetadata(
         dataSource; intervals=nothing, toInclude=nothing, merge=nothing,
-        analysisTypes=nothing, lenientAggregatorMerge=nothing, context=nothing
+        analysisTypes=nothing, lenientAggregatorMerge=nothing, virtualColumns=nothing, context=nothing
     )
         nothing_or_type(intervals, Vector{Interval})
         nothing_or_type(toInclude, Union{String, Vector{String}})
@@ -348,6 +362,7 @@ mutable struct SegmentMetadata <: Query
             all(x ∈ ["cardinality", "minmax", "size", "interval", "timestampSpec", "queryGranularity", "aggregators", "rollup"], analysisTypes)) ||
             error("Invalid analysisTypes")
         nothing_or_type(lenientAggregatorMerge, Bool)
+        nothing_or_type(virtualColumns, Vector{VirtualColumn})
         nothing_or_type(context, Dict)
         if isa(toInclude, String)
             toInclude ∈ ["all", "none"] || error("Invalid toInclude")
@@ -355,15 +370,15 @@ mutable struct SegmentMetadata <: Query
         else
             toInclude = Dict("type" => "list", "columns" => toInclude)
         end
-        new("segmentMetadata", dataSource, intervals, toInclude, merge, analysisTypes, lenientAggregatorMerge, context)
+        new("segmentMetadata", dataSource, intervals, toInclude, merge, analysisTypes, lenientAggregatorMerge, virtualColumns, context)
     end
 end
 SegmentMetadata(
     ; dataSource, intervals=nothing, toInclude=nothing, merge=nothing,
-    analysisTypes=nothing, lenientAggregatorMerge=nothing, context=nothing
+    analysisTypes=nothing, lenientAggregatorMerge=nothing, virtualColumns=nothing, context=nothing
 ) = SegmentMetadata(
     dataSource; intervals, toInclude, merge,
-    analysisTypes, lenientAggregatorMerge, context
+    analysisTypes, lenientAggregatorMerge, virtualColumns, context
 )
 
 """

@@ -53,9 +53,13 @@ export DefaultLS, OrderByColumn
 # SQL Parameter
 export Parameter
 
+# Virtual columns
+export Expression
+
 # Export abstract types
 export Query, Granularity, Aggregator, PostAggregator, Filter, HavingSpec, DataSource,
-    DimensionSpec, ExtractionFunction, SearchQuerySpec, JoinType, TopNMetricSpec, LimitSpec
+    DimensionSpec, ExtractionFunction, SearchQuerySpec, JoinType, TopNMetricSpec, LimitSpec,
+    VirtualColumn
 
 """
     Granularity
