@@ -1,7 +1,7 @@
 name = "Druid"
 uuid = "2c0563d7-0cee-41bd-8996-23dbc945b6d9"
 authors = ["Mihir Gadgil <mmgadgil20@gmail.com>"]
-version = "0.3.0"
+version = "0.3.1"
 
 [deps]
 HTTP = "cd3eb016-35fb-5094-929b-558a96fad6f3"
