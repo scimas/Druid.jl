@@ -32,3 +32,7 @@ end
 @testset "PostAggregations" begin
     include("post_aggregations.jl")
 end
+
+@testset "VirtualColumns" begin
+    include("virtualcolumns.jl")
+end
