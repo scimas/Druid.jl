@@ -2,9 +2,12 @@ JSON.lower(ds::DimensionSpec) = non_nothing_dict(ds)
 JSON.lower(ef::ExtractionFunction) = non_nothing_dict(ef)
 
 """
-    DefaultDS(dimension::String; outputName::String, outputType::String)
+    DefaultDS(dimension::String;
+        outputName=nothing, outputType=nothing)
 
 The "default" type dimension spec.
+
+outputName and outputType should be `String`s if provided.
 """
 struct DefaultDS <: DimensionSpec
     type::String
@@ -19,9 +22,12 @@ struct DefaultDS <: DimensionSpec
 end
 
 """
-    ExtractionDS(dimension::String, extractionFn::ExtractionFunction; outputName::String, outputType::String)
+    ExtractionDS(dimension::String, extractionFn::ExtractionFunction;
+        outputName=nothing, outputType=nothing)
 
 Dimension spec to use with an extraction function.
+
+outputName and outputType should be `String`s if provided.
 """
 struct ExtractionDS <: DimensionSpec
     type::String
@@ -37,9 +43,11 @@ struct ExtractionDS <: DimensionSpec
 end
 
 """
-    ListFiltered(delegate::DimensionSpec, values::Vector{String}; isWhitelist::Bool)
+    ListFiltered(delegate::DimensionSpec, values::Vector{String}; isWhitelist=nothing)
 
 Filter the `delegate` dimension spec with the `values`.
+
+isWhitelist should be a Bool if provided.
 """
 struct ListFiltered <: DimensionSpec
     type::String
@@ -77,9 +85,11 @@ struct PrefixFiltered <: DimensionSpec
 end
 
 """
-    LookupDS(dimension::String, name::String; outputName::String)
+    LookupDS(dimension::String, name::String; outputName=nothing)
 
 A dimension spec to use with the `name` lookup.
+
+outputName should be a String if provided.
 """
 struct LookupDS <: DimensionSpec
     type::String
@@ -105,9 +115,13 @@ end
 JSON.lower(m::Map) = Dict("type" => "map", "map" => m.dict, "isOneToOne" => m.isOneToOne)
 
 """
-    MapLookupDS(dimension::String, lookup::Map; outputName::String, retainMissingValue::Bool, replaceMissingValueWith::String, optimize::Bool)
+    MapLookupDS(dimension::String, lookup::Map;
+        outputName=nothing, retainMissingValue=nothing, replaceMissingValueWith=nothing, optimize=nothing)
 
 Map lookup dimension spec.
+
+outputName and replaceMissingValueWith should be `String`s, retainMissingValue
+and optimize should be `Bool`s if provided.
 """
 struct MapLookupDS <: DimensionSpec
     type::String
@@ -128,9 +142,12 @@ struct MapLookupDS <: DimensionSpec
 end
 
 """
-    RegexEF(expr::String; index::Integer, replaceMissingValue::Bool, replaceMissingValueWith::String)
+    RegexEF(expr::String; index=nothing, replaceMissingValue=nothing, replaceMissingValueWith=nothing)
 
 Regex based extraction function.
+
+index should be a non negative integer, replaceMissingValue a Bool and
+replaceMissingValueWith a String if provided.
 """
 struct RegexEF <: ExtractionFunction
     type::String
@@ -168,9 +185,11 @@ struct SearchQueryEF <: ExtractionFunction
 end
 
 """
-    SubstringEF(index::UInt64; length::Integer)
+    SubstringEF(index::UInt64; length=nothing)
 
 Substring extraction based on index and length.
+
+length should be a non negative integer if provided.
 """
 struct SubstringEF <: ExtractionFunction
     type::String
@@ -193,9 +212,12 @@ struct StrlenEF <: ExtractionFunction
 end
 
 """
-    TimeFormatEF(; format::String, timeZone::String, locale::String, granularity::String, asMillis::Bool)
+    TimeFormatEF(; format=nothing, timeZone=nothing, locale=nothing, granularity=nothing, asMillis=nothing)
 
 Extract timestamps.
+
+format, timeZone, locale should be `String`s, granularity should be a
+Granularity and asMillis should be a Bool if provided.
 """
 struct TimeFormatEF <: ExtractionFunction
     type::String
@@ -215,9 +237,11 @@ struct TimeFormatEF <: ExtractionFunction
 end
 
 """
-    TimeParseEF(timeFormat::String, resultFormat::String)
+    TimeParseEF(timeFormat::String, resultFormat::String; joda=nothing)
 
 Parse and extract time.
+
+joda should be a Bool if provided.
 """
 struct TimeParseEF <: ExtractionFunction
     type::String
@@ -231,9 +255,11 @@ struct TimeParseEF <: ExtractionFunction
 end
 
 """
-    JavaScriptEF(jsfunction::String; injective::Bool)
+    JavaScriptEF(jsfunction::String; injective=nothing)
 
 Extract using a custom JavaScript function.
+
+injective should be a Bool if provided.
 """
 struct JavaScriptEF <: ExtractionFunction
     type::String
@@ -256,9 +282,13 @@ function JSON.lower(ef::JavaScriptEF)
 end
 
 """
-    RegisteredLookupEF(lookup::String; retainMissingValue::Bool, replaceMissingValueWith::String, injective::Bool, optimize::Bool)
+    RegisteredLookupEF(lookup::String;
+        retainMissingValue=nothing, replaceMissingValueWith=nothing, injective=nothing, optimize=nothing)
 
 Extract using a registered lookup.
+
+retainMissingValue, injective, optimize should be `Bool`s and
+replaceMissingValueWith should be a String if provided.
 """
 struct RegisteredLookupEF <: ExtractionFunction
     type::String
@@ -278,9 +308,13 @@ struct RegisteredLookupEF <: ExtractionFunction
 end
 
 """
-    InlineLookupEF(lookup::Map; retainMissingValue::Bool, replaceMissingValueWith::String, injective::Bool, optimize::Bool)
+    InlineLookupEF(lookup::Map;
+        retainMissingValue=nothing, replaceMissingValueWith=nothing, injective=nothing, optimize=nothing)
 
 Extract using an inline lookup.
+
+retainMissingValue, injective, optimize should be `Bool`s and
+replaceMissingValueWith should be a String if provided.
 """
 struct InlineLookupEF <: ExtractionFunction
     type::String
@@ -310,9 +344,11 @@ struct CascadeEF <: ExtractionFunction
 end
 
 """
-    StringFormatEF(format::String; nullHandling::String)
+    StringFormatEF(format::String; nullHandling=nothing)
 
 Extract strings using a format.
+
+nullHandling should be a String if provided.
 """
 struct StringFormatEF <: ExtractionFunction
     type::String
@@ -325,9 +361,11 @@ struct StringFormatEF <: ExtractionFunction
 end
 
 """
-    UpperEF(; locale::String)
+    UpperEF(; locale=nothing)
 
 Extract strings as upper case.
+
+locale should be a String if provided.
 """
 struct UpperEF <: ExtractionFunction
     type::String
@@ -339,9 +377,11 @@ struct UpperEF <: ExtractionFunction
 end
 
 """
-    LowerEF(; locale)
+    LowerEF(; locale=nothing)
 
 Extract strings as lower case.
+
+locale should be a String if provided.
 """
 struct LowerEF <: ExtractionFunction
     type::String
@@ -353,9 +393,11 @@ struct LowerEF <: ExtractionFunction
 end
 
 """
-    BucketEF(; size::Integer, offset::Integer)
+    BucketEF(; size=nothing, offset=nothing)
 
 Bucket numeric values into `size` buckets starting at `offset`.
+
+size and offset should be non negative integers if provided.
 """
 struct BucketEF <: ExtractionFunction
     type::String

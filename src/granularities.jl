@@ -20,7 +20,7 @@ end
 JSON.lower(sg::SimpleGranularity) = sg.name
 
 """
-    DurationGranularity(duration::UInt64; origin)
+    DurationGranularity(duration::UInt64; origin=nothing)
 
 Duration type granularity where the duration is specified as milliseconds since
 origin.
@@ -39,7 +39,7 @@ struct DurationGranularity <: Granularity
 end
 
 """
-    PeriodGranularity(period::String; origin, timezone)
+    PeriodGranularity(period::String; origin=nothing, timezone=nothing)
 
 Period type granularity where the period is specified as an ISO8601 period
 string. Period starts on origin in the timezone.

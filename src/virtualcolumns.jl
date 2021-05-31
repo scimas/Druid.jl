@@ -1,9 +1,11 @@
 JSON.lower(vc::VirtualColumn) = non_nothing_dict(vc)
 
 """
-    Expression(name::String, expression::String; outputType::String)
+    Expression(name::String, expression::String; outputType=nothing)
 
 Create a virtual column using `expression`.
+
+outputType should be String if provided.
 """
 struct Expression <: VirtualColumn
     type::String

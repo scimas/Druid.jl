@@ -4,11 +4,17 @@ JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
 JSON.lower(ls::LimitSpec) = non_nothing_dict(ls)
 
 """
-    Timeseries(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity)
+    Timeseries(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity; <keyword arguments>)
 
-    Timeseries(dataSource, intervals, granularity;
-        filter::Filter, aggregations::Vector{Aggregator}, postAggregations::Vector{PostAggregator},
-        descending::Bool, limit::Integer, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- filter::Filter = nothing
+- aggregations::Vector{Aggregator} = nothing
+- postAggregations::Vector{PostAggregator} = nothing
+- descending::Bool = nothing
+- limit::Integer = nothing
+- context::Dict = nothing
 """
 mutable struct Timeseries <: Query
     queryType::String
@@ -64,10 +70,11 @@ end
 
 """
     Dimension()
-
-    Dimension(; ordering::String, previousStop::String)
+    Dimension(; ordering=nothing, previousStop=nothing)
 
 Dimension topN metric spec.
+
+ordering and previousStop should be `String`s if provided.
 """
 struct Dimension <: TopNMetricSpec
     type::String
@@ -93,10 +100,15 @@ end
 
 """
     TopN(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity,
-        dimension::DimensionSpec, threshold::Uint64, metric::TopNMetricSpec)
+        dimension::DimensionSpec, threshold::Uint64, metric::TopNMetricSpec; <keyword arguments>)
 
-    TopN(dataSource, intervals, granularity, dimension, threshold, metric;
-        aggregations::Vector{Aggregator}, postAggregations::Vector{PostAggregator}, filter::Filter, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- aggregations::Vector{Aggregator} = nothing
+- postAggregations::Vector{PostAggregator} = nothing
+- filter::Filter = nothing
+- context::Dict = nothing
 """
 mutable struct TopN <: Query
     queryType::String
@@ -140,7 +152,9 @@ TopN(
 )
 
 """
-    OrderByColumn(dimension::String, direction::String; dimensionOrder::String)
+    OrderByColumn(dimension::String, direction::String; dimensionOrder=nothing)
+
+dimensionOrder should be a String if provided.
 """
 struct OrderByColumn
     dimension::String
@@ -157,9 +171,12 @@ end
 JSON.lower(oc::OrderByColumn) = non_nothing_dict(oc)
 
 """
-    DefaultLS(; limit::Integer, offset::Integer, columns::Vector{OrderByColumn})
+    DefaultLS(; limit=nothing, offset=nothing, columns=nothing)
 
 Default limitSpec.
+
+limit and offset should be non negative integers if provided. columns should be
+Vector{OrderByColumn} if provided.
 """
 struct DefaultLS <: LimitSpec
     type::String
@@ -174,12 +191,24 @@ struct DefaultLS <: LimitSpec
 end
 
 """
-    GroupBy(dataSource::DataSource, dimesnions::Vector{DimensionSpec}, intervals::Vector{Interval}, granularity::Granularity)
+    GroupBy(
+        dataSource::DataSource,
+        dimesnions::Vector{DimensionSpec},
+        intervals::Vector{Interval},
+        granularity::Granularity;
+        <keyword arguments>
+    )
 
-    GroupBy(dataSource, dimesnions, intervals, granularity;
-        limitSpec::LimitSpec, having::HavingSpec, filter::Filter,
-        aggregations::Vector{Aggregator}, postAggregations::Vector{PostAggregator},
-        subtotalsSpec::Vector{Vector{String}}, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- limitSpec::LimitSpec = nothing
+- having::HavingSpec = nothing
+- filter::Filter = nothing
+- aggregations::Vector{Aggregator} = nothing
+- postAggregations::Vector{PostAggregator} = nothing
+- subtotalsSpec::Vector{Vector{String}} = nothing
+- context::Dict = nothing
 """
 mutable struct GroupBy <: Query
     queryType::String
@@ -223,12 +252,20 @@ GroupBy(
 )
 
 """
-    Scan(dataSource::DataSource, intervals::Vector{Interval})
+    Scan(dataSource::DataSource, intervals::Vector{Interval}; <keyword arguments>)
 
-    Scan(dataSource, intervals;
-        columns::Vector{String}, filter::Filter, order::String,
-        limit::Integer, offset::Integer, resultFormat::String,
-        batchSize::Integer, context::Dict, legacy::Bool)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- columns::Vector{String} = nothing
+- filter::Filter = nothing
+- order::String = nothing
+- limit::Integer = nothing
+- offset::Integer = nothing
+- resultFormat::String = nothing
+- batchSize::Integer = nothing
+- context::Dict = nothing
+- legacy::Bool = nothing
 """
 mutable struct Scan <: Query
     queryType::String
@@ -275,10 +312,16 @@ Scan(
 )
 
 """
-    Search(dataSource::DataSource, intervals::Vector{Interval}, query::SearchQuerySpec)
+    Search(dataSource::DataSource, intervals::Vector{Interval}, query::SearchQuerySpec; <keyword arguments>)
 
-    Search(dataSource, intervals, query;
-        granularity::Granularity, filter::Filter, sort::String, limit::Integer, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- granularity::Granularity = nothing
+- filter::Filter = nothing
+- sort::String = nothing
+- limit::Integer = nothing
+- context::Dict = nothing
 """
 mutable struct Search <: Query
     queryType::String
@@ -313,9 +356,14 @@ Search(
 )
 
 """
-    TimeBoundary(dataSource::DataSource)
+    TimeBoundary(dataSource::DataSource; <keyword arguments>)
 
-    TimeBoundary(dataSource; bound::String, filter::Filter, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- bound::String = nothing
+- filter::Filter = nothing
+- context::Dict = nothing
 """
 mutable struct TimeBoundary <: Query
     queryType::String
@@ -336,10 +384,17 @@ TimeBoundary(; dataSource, bound=nothing, filter=nothing, virtualColumns=nothing
     TimeBoundary(dataSource; bound, filter, virtualColumns, context)
 
 """
-    SegmentMetadata(dataSource::DataSource)
+    SegmentMetadata(dataSource::DataSource; <keyword arguments>)
 
-    SegmentMetadata(dataSource; intervals::Vector{Interval}, toInclude::Union{String, Vector{String}},
-        merge::Bool, analysisTypes::Vector{String}, lenientAggregatorMerge::Bool, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- intervals::Vector{Interval} = nothing
+- toInclude::Union{String, Vector{String}} = nothing
+- merge::Bool = nothing
+- analysisTypes::Vector{String} = nothing
+- lenientAggregatorMerge::Bool = nothing
+- context::Dict = nothing
 """
 mutable struct SegmentMetadata <: Query
     queryType::String
@@ -382,9 +437,9 @@ SegmentMetadata(
 )
 
 """
-    DatasourceMetadata(dataSource::DataSource)
+    DatasourceMetadata(dataSource::DataSource; context=nothing)
 
-    DatasourceMetadata(dataSource; context::Dict)
+context should be a Dict if provided.
 """
 mutable struct DatasourceMetadata <: Query
     queryType::String
@@ -419,9 +474,15 @@ end
 JSON.lower(p::Parameter) = non_nothing_dict(p)
 
 """
-    Sql(query::String)
+    Sql(query::String; <keyword arguments>)
 
-    Sql(query; parameters::Vector{Parameter}, resultFormat::String, header::Bool, context::Dict)
+A method with all arguments as keyword arguments is also provided.
+
+# Arguments
+- parameters::Vector{Parameter} = nothing
+- resultFormat::String = nothing
+- header::Bool = nothing
+- context::Dict = nothing
 """
 mutable struct Sql <: Query
     query::String
@@ -443,7 +504,7 @@ Sql(; query, parameters=nothing, resultFormat=nothing, header=nothing, context=n
 query_type(::Sql) = "SQL"
 
 """
-    execute(client, query)
+    execute(client, query; pretty=false)
 
 Executes the native Druid `query` on the `client::Client`. Returns the query
 results as a String. Throws exception if query execution fails.

@@ -1,9 +1,11 @@
 JSON.lower(pa::PostAggregator) = non_nothing_dict(pa)
 
 """
-    Arithmetic(name::String, fn::String, fields::Vector{PostAggregator}; ordering::String)
+    Arithmetic(name::String, fn::String, fields::Vector{PostAggregator}; ordering=nothing)
 
 Apply the `fn` aggregation to the `fields`.
+
+ordering should be a String if provided.
 """
 struct Arithmetic <: PostAggregator
     type::String
@@ -21,7 +23,6 @@ end
 
 """
     FieldAccess(name::String, aggregator::String)
-
     FieldAccess(aggregator::String)
 
 Access the `aggregator` and return as `name`.
@@ -36,7 +37,6 @@ FieldAccess(aggregator) = FieldAccess(aggregator, aggregator)
 
 """
     FinalizingFieldAccess(name::String, aggregator::String)
-
     FinalizingFieldAccess(aggregator::String)
 
 Access the `aggregator` and return as `name`.
@@ -113,7 +113,6 @@ JSON.lower(pa::JavaScriptPA) = Dict("type" => pa.type, "name" => pa.name, "field
 
 """
     HyperUniqueCardinality(name::String, field::String)
-    
     HyperUniqueCardinality(field::String)
 
 Post aggregator of a hyper unique aggregation.

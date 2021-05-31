@@ -101,9 +101,11 @@ struct ExtractionFilter <: Filter
 end
 
 """
-    Contains(value::String; case_sensitive::Bool)
+    Contains(value::String; case_sensitive=nothing)
 
 Search query spec for strings containing `value`.
+
+case_sensitive should be a Bool if provided.
 """
 struct Contains <: SearchQuerySpec
     type::String
@@ -127,9 +129,11 @@ struct InsensitiveContains <: SearchQuerySpec
 end
 
 """
-    Fragment(value::String; case_sensitive::Bool)
+    Fragment(value::String; case_sensitive=nothing)
 
 Fragment search query spec.
+
+case_sensitive should be a Bool if provided.
 """
 struct Fragment <: SearchQuerySpec
     type::String
@@ -142,9 +146,11 @@ struct Fragment <: SearchQuerySpec
 end
 
 """
-    SearchF(dimension::String, query::SearchQuerySpec; extractionFn::ExtractionFunction)
+    SearchF(dimension::String, query::SearchQuerySpec; extractionFn=nothing)
 
 Filter using a query and optionally extraction function.
+
+extractionFn should be an ExtractionFunction if provided.
 """
 struct SearchF <: Filter
     type::String
@@ -170,9 +176,11 @@ struct InF <: Filter
 end
 
 """
-    Like(dimension::String, pattern::String; escape::String, extractionFn::ExtractionFunction)
+    Like(dimension::String, pattern::String; escape=nothing, extractionFn=nothing)
 
 Filter strings matching `pattern`.
+
+escape should be a String and extractionFn an ExtractionFunction if provided.
 """
 struct Like <: Filter
     type::String
@@ -188,9 +196,15 @@ struct Like <: Filter
 end
 
 """
-    Bound(dimension::String; lower::String, upper::String, lowerStrict::Bool, upperStrict::Bool, ordering::String, extractionFn::ExtractionFunction)
+    Bound(dimension::String;
+        lower=nothing, upper=nothing, lowerStrict=nothing, upperStrict=nothing,
+        ordering=nothing, extractionFn=nothing)
 
 Filter values bounded in a range.
+
+lower, upper and ordering should be `String`s if provided. lowerStrict and
+upperStrict should be `Bool`s if provided. extractionFn should be an
+ExtractionFunction if provided.
 """
 struct Bound <: Filter
     type::String
@@ -214,9 +228,11 @@ struct Bound <: Filter
 end
 
 """
-    IntervalF(dimension::String, intervals::Vector{Interval}; extractionFn::ExtractionFunction)
+    IntervalF(dimension::String, intervals::Vector{Interval}; extractionFn=nothing)
 
 Filter by time falling in one of the `intervals`.
+
+extractionFn should be an ExtractionFunction if provided.
 """
 struct IntervalF <: Filter
     type::String

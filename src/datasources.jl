@@ -59,7 +59,7 @@ end
 """
     Join(left::Union{Table, Lookup, Inline, QuerySource, Join},
         right::Union{Lookup, Inline, QuerySource}, rightPrefix::String,
-        condition::String, joinType::JoinType)
+        condition::String, joinType::String)
 
 Join datasource.
 """

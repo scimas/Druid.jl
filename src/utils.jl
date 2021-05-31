@@ -1,3 +1,4 @@
+"Convert a structure into a Dict but only with the properties with non-nothing values."
 function non_nothing_dict(s, d::Dict)
     for fname ∈ propertynames(s)
         val = getproperty(s, fname)
