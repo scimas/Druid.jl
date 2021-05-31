@@ -12,7 +12,7 @@ struct Count <: Aggregator
 end
 
 """
-    SingelField(type, field, output_name)
+    SingleField(type, field, output_name)
 
 Apply `type` aggregator to the `field` and get result as `output_name`.
 
