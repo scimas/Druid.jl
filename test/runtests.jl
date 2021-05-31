@@ -12,3 +12,7 @@ end
 @testset "Dimensionspecs" begin
     include("dimensionspecs.jl")
 end
+
+@testset "Filters" begin
+    include("filters.jl")
+end
