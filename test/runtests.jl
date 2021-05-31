@@ -20,3 +20,15 @@ end
 @testset "Granularities" begin
     include("granularities.jl")
 end
+
+@testset "Havingspecs" begin
+    include("having.jl")
+end
+
+@testset "Intervals" begin
+    include("intervals.jl")
+end
+
+@testset "PostAggregations" begin
+    include("post_aggregations.jl")
+end
