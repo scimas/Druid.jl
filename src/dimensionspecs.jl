@@ -37,7 +37,7 @@ struct ExtractionDS <: DimensionSpec
     outputType
     function ExtractionDS(dimension, extractionFn; outputName=nothing, outputType=nothing)
         nothing_or_type(outputName, String)
-        outputType === nothing || (outputType = uppercase(outputType)) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
+        outputType === nothing || nothing_or_type(outputType, String) && (outputType = uppercase(outputType)) ∈ ["STRING", "LONG", "FLOAT"] || error("Invalid outputType")
         new("extraction", dimension, extractionFn, outputName, outputType)
     end
 end
