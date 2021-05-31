@@ -16,3 +16,7 @@ end
 @testset "Filters" begin
     include("filters.jl")
 end
+
+@testset "Granularities" begin
+    include("granularities.jl")
+end
