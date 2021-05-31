@@ -326,6 +326,7 @@ struct InlineLookupEF <: ExtractionFunction
     function InlineLookupEF(lookup; retainMissingValue=nothing, replaceMissingValueWith=nothing, injective=nothing, optimize=nothing)
         nothing_or_type(retainMissingValue, Bool)
         nothing_or_type(replaceMissingValueWith, String)
+        nothing_or_type(injective, Bool)
         nothing_or_type(optimize, Bool)
         retainMissingValue != true || !isa(replaceMissingValueWith, String) || error("Cannon specify replaceMissingValueWith when retainMissingValue == true")
         new("lookup", lookup, retainMissingValue, replaceMissingValueWith, injective, optimize)
