@@ -36,3 +36,7 @@ end
 @testset "VirtualColumns" begin
     include("virtualcolumns.jl")
 end
+
+@testset "Queries" begin
+    include("queries.jl")
+end
