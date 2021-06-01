@@ -164,7 +164,7 @@ struct OrderByColumn
         direction ∈ ["ascending", "descending"] || error("Invalid direction")
         dimensionOrder === nothing ||
             (dimensionOrder = lowercase(dimensionOrder)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] ||
-            error("Invalid dimsionOrder")
+            error("Invalid dimensionOrder")
         new(dimension, direction, dimensionOrder)
     end
 end
