@@ -113,3 +113,35 @@ end
     @test_throws TypeError TimeBoundary(ds, virtualColumns=1)
     @test_throws TypeError TimeBoundary(ds, context=1)
 end
+
+@testset "SegmentMetadata" begin
+    @test_throws TypeError SegmentMetadata(
+        ds, intervals=1)
+    @test_throws TypeError SegmentMetadata(
+        ds, toInclude=1)
+    @test_throws TypeError SegmentMetadata(
+        ds, merge=1)
+    @test_throws ErrorException("Invalid analysisTypes") SegmentMetadata(
+        ds, analysisTypes="a")
+    @test_throws TypeError SegmentMetadata(
+        ds, lenientAggregatorMerge=1)
+    @test_throws TypeError SegmentMetadata(
+        ds, virtualColumns=1)
+    @test_throws TypeError SegmentMetadata(
+        ds, context=1)
+end
+
+@testset "DatasourceMetadata" begin
+    @test_throws TypeError DatasourceMetadata(ds, context=1)
+end
+
+@testset "Parameter" begin
+    @test_throws ErrorException("Invalid 'type'") Parameter("a", 1)
+end
+
+@testset "SQL" begin
+    @test_throws TypeError Sql("query", parameters=1)
+    @test_throws ErrorException("Invalid resultFormat") Sql("query", resultFormat="a")
+    @test_throws TypeError Sql("query", header=1)
+    @test_throws TypeError Sql("query", context=1)
+end
