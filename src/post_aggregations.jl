@@ -11,7 +11,7 @@ struct Arithmetic <: PostAggregator
     type::String
     name::String
     fn::String
-    fields::Vector{PostAggregator}
+    fields::Vector{<:PostAggregator}
     ordering
     function Arithmetic(name, fn, fields; ordering=nothing)
         fn = string(fn)
@@ -70,7 +70,7 @@ long) and return as `name`.
 struct Greatest <: PostAggregator
     type::String
     name::String
-    fields::Vector{PostAggregator}
+    fields::Vector{<:PostAggregator}
     function Greatest(name, fields, dtype)
         dtype = lowercase(dtype)
         dtype ∈ ["double", "long"] || error("Invalid data type")
@@ -87,7 +87,7 @@ long) and return as `name`.
 struct Least <: PostAggregator
     type::String
     name::String
-    fields::Vector{PostAggregator}
+    fields::Vector{<:PostAggregator}
     function Least(name, fields, dtype)
         dtype = lowercase(dtype)
         dtype ∈ ["double", "long"] || error("Invalid data type")

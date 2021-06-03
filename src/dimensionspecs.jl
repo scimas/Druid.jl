@@ -340,7 +340,7 @@ Apply multiple extraction functions in sequence.
 """
 struct CascadeEF <: ExtractionFunction
     type::String
-    extractionFns::Vector{ExtractionFunction}
+    extractionFns::Vector{<:ExtractionFunction}
     CascadeEF(extractionFns) = new("cascade", extractionFns)
 end
 

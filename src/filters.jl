@@ -47,7 +47,7 @@ Match all `filters`.
 """
 struct AndF <: Filter
     type::String
-    fields::Vector{Filter}
+    fields::Vector{<:Filter}
     AndF(filters) = new("and", filters)
 end
 
@@ -58,7 +58,7 @@ Match at least one of the `filters`.
 """
 struct OrF <: Filter
     type::String
-    fields::Vector{Filter}
+    fields::Vector{<:Filter}
     OrF(filters) = new("or", filters)
 end
 
@@ -237,7 +237,7 @@ extractionFn should be an ExtractionFunction if provided.
 struct IntervalF <: Filter
     type::String
     dimension::String
-    intervals::Vector{Interval}
+    intervals::Vector{<:Interval}
     extractionFn
     function IntervalF(dimension, intervals; extractionFn=nothing)
         nothing_or_type(extractionFn, ExtractionFunction)

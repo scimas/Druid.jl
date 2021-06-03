@@ -55,7 +55,7 @@ Match all `havingSpecs`.
 """
 struct AndH <: HavingSpec
     type::String
-    havingSpecs::Vector{HavingSpec}
+    havingSpecs::Vector{<:HavingSpec}
     AndH(havingSpecs) = new("and", havingSpecs)
 end
 
@@ -66,7 +66,7 @@ Match at leats one of the `havingSpecs`.
 """
 struct OrH <: HavingSpec
     type::String
-    havingSpecs::Vector{HavingSpec}
+    havingSpecs::Vector{<:HavingSpec}
     OrH(havingSpecs) = new("or", havingSpecs)
 end
 
