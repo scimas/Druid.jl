@@ -1,7 +1,7 @@
 JSON.lower(pa::PostAggregator) = non_nothing_dict(pa)
 
 """
-    Arithmetic(name::String, fn::String, fields::Vector{PostAggregator}; ordering=nothing)
+    Arithmetic(name::String, fn::String, fields::Vector{<:PostAggregator}; ordering=nothing)
 
 Apply the `fn` aggregation to the `fields`.
 
@@ -62,7 +62,7 @@ struct ConstantPA <: PostAggregator
 end
 
 """
-    Greatest(name::String, fields::Vector{PostAggregator}, dtype::String)
+    Greatest(name::String, fields::Vector{<:PostAggregator}, dtype::String)
 
 Find the largest value per row across the `fields` of type `dtype` (double,
 long) and return as `name`.
@@ -79,7 +79,7 @@ struct Greatest <: PostAggregator
 end
 
 """
-    Least(name::String, fields::Vector{PostAggregator}, dtype::String)
+    Least(name::String, fields::Vector{<:PostAggregator}, dtype::String)
 
 Find the smallest value per row across the `fields` of type `dtype` (double,
 long) and return as `name`.

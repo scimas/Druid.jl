@@ -4,14 +4,15 @@ JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
 JSON.lower(ls::LimitSpec) = non_nothing_dict(ls)
 
 """
-    Timeseries(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity; <keyword arguments>)
+    Timeseries(dataSource::DataSource, intervals::Vector{<:Interval}, granularity::Granularity; <keyword arguments>)
 
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
 - filter::Filter = nothing
-- aggregations::Vector{Aggregator} = nothing
-- postAggregations::Vector{PostAggregator} = nothing
+- aggregations::Vector{<:Aggregator} = nothing
+- postAggregations::Vector{<:PostAggregator} = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - descending::Bool = nothing
 - limit::Integer = nothing
 - context::Dict = nothing
@@ -19,7 +20,7 @@ A method with all arguments as keyword arguments is also provided.
 mutable struct Timeseries <: Query
     queryType::String
     dataSource::DataSource
-    intervals::Vector{Interval}
+    intervals::Vector{<:Interval}
     granularity::Granularity
     filter
     aggregations
@@ -105,9 +106,10 @@ end
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
-- aggregations::Vector{Aggregator} = nothing
-- postAggregations::Vector{PostAggregator} = nothing
+- aggregations::Vector{<:Aggregator} = nothing
+- postAggregations::Vector{<:PostAggregator} = nothing
 - filter::Filter = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - context::Dict = nothing
 """
 mutable struct TopN <: Query
@@ -193,8 +195,8 @@ end
 """
     GroupBy(
         dataSource::DataSource,
-        dimesnions::Vector{DimensionSpec},
-        intervals::Vector{Interval},
+        dimesnions::Vector{<:DimensionSpec},
+        intervals::Vector{<:Interval},
         granularity::Granularity;
         <keyword arguments>
     )
@@ -205,8 +207,9 @@ A method with all arguments as keyword arguments is also provided.
 - limitSpec::LimitSpec = nothing
 - having::HavingSpec = nothing
 - filter::Filter = nothing
-- aggregations::Vector{Aggregator} = nothing
-- postAggregations::Vector{PostAggregator} = nothing
+- aggregations::Vector{<:Aggregator} = nothing
+- postAggregations::Vector{<:PostAggregator} = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - subtotalsSpec::Vector{Vector{String}} = nothing
 - context::Dict = nothing
 """
@@ -252,13 +255,14 @@ GroupBy(
 )
 
 """
-    Scan(dataSource::DataSource, intervals::Vector{Interval}; <keyword arguments>)
+    Scan(dataSource::DataSource, intervals::Vector{<:Interval}; <keyword arguments>)
 
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
 - columns::Vector{String} = nothing
 - filter::Filter = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - order::String = nothing
 - limit::Integer = nothing
 - offset::Integer = nothing
@@ -312,13 +316,14 @@ Scan(
 )
 
 """
-    Search(dataSource::DataSource, intervals::Vector{Interval}, query::SearchQuerySpec; <keyword arguments>)
+    Search(dataSource::DataSource, intervals::Vector{<:Interval}, query::SearchQuerySpec; <keyword arguments>)
 
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
 - granularity::Granularity = nothing
 - filter::Filter = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - sort::String = nothing
 - limit::Integer = nothing
 - context::Dict = nothing
@@ -363,6 +368,7 @@ A method with all arguments as keyword arguments is also provided.
 # Arguments
 - bound::String = nothing
 - filter::Filter = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - context::Dict = nothing
 """
 mutable struct TimeBoundary <: Query
@@ -389,11 +395,12 @@ TimeBoundary(; dataSource, bound=nothing, filter=nothing, virtualColumns=nothing
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
-- intervals::Vector{Interval} = nothing
+- intervals::Vector{<:Interval} = nothing
 - toInclude::Union{String, Vector{String}} = nothing
 - merge::Bool = nothing
 - analysisTypes::Vector{String} = nothing
 - lenientAggregatorMerge::Bool = nothing
+- virtualColumns::Vector{<:VirtualColumn} = nothing
 - context::Dict = nothing
 """
 mutable struct SegmentMetadata <: Query

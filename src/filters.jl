@@ -41,7 +41,7 @@ struct RegexF <: Filter
 end
 
 """
-    AndF(filters::Vector{Filter})
+    AndF(filters::Vector{<:Filter})
 
 Match all `filters`.
 """
@@ -52,7 +52,7 @@ struct AndF <: Filter
 end
 
 """
-    OrF(filters::Vector{Filter})
+    OrF(filters::Vector{<:Filter})
 
 Match at least one of the `filters`.
 """
@@ -228,7 +228,7 @@ struct Bound <: Filter
 end
 
 """
-    IntervalF(dimension::String, intervals::Vector{Interval}; extractionFn=nothing)
+    IntervalF(dimension::String, intervals::Vector{<:Interval}; extractionFn=nothing)
 
 Filter by time falling in one of the `intervals`.
 

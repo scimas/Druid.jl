@@ -49,7 +49,7 @@ struct DimSelector <: HavingSpec
 end
 
 """
-    AndH(havingSpecs::Vector{HavingSpec})
+    AndH(havingSpecs::Vector{<:HavingSpec})
 
 Match all `havingSpecs`.
 """
@@ -60,7 +60,7 @@ struct AndH <: HavingSpec
 end
 
 """
-    OrH(havingSpecs::Vector{HavingSpec})
+    OrH(havingSpecs::Vector{<:HavingSpec})
 
 Match at leats one of the `havingSpecs`.
 """

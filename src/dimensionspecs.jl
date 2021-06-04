@@ -334,7 +334,7 @@ struct InlineLookupEF <: ExtractionFunction
 end
 
 """
-    CascadeEF(extractionFns::Vector{ExtractionFunction})
+    CascadeEF(extractionFns::Vector{<:ExtractionFunction})
 
 Apply multiple extraction functions in sequence.
 """
