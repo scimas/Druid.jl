@@ -1,6 +1,8 @@
 """
     Search(dataSource::DataSource, intervals::Vector{<:Interval}, query::SearchQuerySpec; <keyword arguments>)
 
+Returns a Druid.SearchResult which is compatible with the Tables.jl interface.
+
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
