@@ -112,33 +112,33 @@ struct GroupByResult <: QueryResult
     inner_array::Vector{Dict}
 end
 
-names(tr::GroupByResult) = getfield(tr, :names)
+names(gr::GroupByResult) = getfield(gr, :names)
 
-Base.getindex(tr::GroupByResult, i::Int) = getfield(tr, :inner_array)[i]
+Base.getindex(gr::GroupByResult, i::Int) = getfield(gr, :inner_array)[i]
 
 Tables.rowaccess(::GroupByResult) = true
-Tables.rows(tr::GroupByResult) = tr
+Tables.rows(gr::GroupByResult) = gr
 
 Base.eltype(::GroupByResult) = GroupByRow
-Base.length(tr::GroupByResult) = length(getfield(tr, :inner_array))
-Base.iterate(tr::GroupByResult, state=1) = state > length(tr) ? nothing : (GroupByRow(state, tr), state + 1)
+Base.length(gr::GroupByResult) = length(getfield(gr, :inner_array))
+Base.iterate(gr::GroupByResult, state=1) = state > length(gr) ? nothing : (GroupByRow(state, gr), state + 1)
 
 struct GroupByRow
     row::Int
     source::GroupByResult
 end
 
-function Tables.getcolumn(tr::GroupByRow, name::Symbol)
+function Tables.getcolumn(gr::GroupByRow, name::Symbol)
     if name == :timestamp
-        getfield(tr, :source)[getfield(tr, :row)][string(name)]
+        getfield(gr, :source)[getfield(gr, :row)][string(name)]
     else
-        getfield(tr, :source)[getfield(tr, :row)]["event"][string(name)]
+        getfield(gr, :source)[getfield(gr, :row)]["event"][string(name)]
     end
 end
 
-Tables.getcolumn(tr::GroupByRow, i::Int) = Tables.getcolumn(tr, names(getfield(tr, :source))[i])
-Tables.columnnames(tr::GroupByRow) = names(getfield(tr, :source))
+Tables.getcolumn(gr::GroupByRow, i::Int) = Tables.getcolumn(gr, names(getfield(gr, :source))[i])
+Tables.columnnames(gr::GroupByRow) = names(getfield(gr, :source))
 
-function Base.show(io::IO, tr::GroupByRow)
-    print(io, getfield(tr, :source)[getfield(tr, :row)])
+function Base.show(io::IO, gr::GroupByRow)
+    print(io, getfield(gr, :source)[getfield(gr, :row)])
 end
