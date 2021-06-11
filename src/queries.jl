@@ -421,7 +421,7 @@ mutable struct SegmentMetadata <: Query
         nothing_or_type(toInclude, Union{String, Vector{String}})
         nothing_or_type(merge, Bool)
         analysisTypes === nothing || (isa(analysisTypes, Vector{String}) &&
-            all(x ∈ ["cardinality", "minmax", "size", "interval", "timestampSpec", "queryGranularity", "aggregators", "rollup"], analysisTypes)) ||
+            all(at -> at ∈ ["cardinality", "minmax", "size", "interval", "timestampSpec", "queryGranularity", "aggregators", "rollup"], analysisTypes)) ||
             error("Invalid analysisTypes")
         nothing_or_type(lenientAggregatorMerge, Bool)
         nothing_or_type(virtualColumns, Vector{<:VirtualColumn})
