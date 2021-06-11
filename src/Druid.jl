@@ -17,7 +17,7 @@ export Client
 export execute, Timeseries, TopN, GroupBy, Scan, Search, TimeBoundary, SegmentMetadata, DatasourceMetadata, Sql
 
 # DataSources
-export Table, Lookup, Unioned, Inline, QuerySource, INNER, LEFT, Join
+export Table, Lookup, Unioned, Inline, QuerySource, Join
 
 # Granularities and Interval
 export SimpleGranularity, DurationGranularity, PeriodGranularity, Interval
@@ -58,7 +58,7 @@ export Expression
 
 # Export abstract types
 export Query, Granularity, Aggregator, PostAggregator, Filter, HavingSpec, DataSource,
-    DimensionSpec, ExtractionFunction, SearchQuerySpec, JoinType, TopNMetricSpec, LimitSpec,
+    DimensionSpec, ExtractionFunction, SearchQuerySpec, TopNMetricSpec, LimitSpec,
     VirtualColumn
 
 """
