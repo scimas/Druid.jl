@@ -195,7 +195,7 @@ end
 """
     GroupBy(
         dataSource::DataSource,
-        dimesnions::Vector{<:DimensionSpec},
+        dimensions::Vector{<:DimensionSpec},
         intervals::Vector{<:Interval},
         granularity::Granularity;
         <keyword arguments>
@@ -228,7 +228,7 @@ mutable struct GroupBy <: Query
     subtotalsSpec
     context
     function GroupBy(
-        dataSource, dimesnions, intervals, granularity;
+        dataSource, dimensions, intervals, granularity;
         limitSpec=nothing, having=nothing, filter=nothing,
         aggregations=nothing, postAggregations=nothing,
         virtualColumns=nothing, subtotalsSpec=nothing, context=nothing
@@ -246,11 +246,11 @@ mutable struct GroupBy <: Query
     end
 end
 GroupBy(
-    ; dataSource, dimesnions, intervals, granularity,
+    ; dataSource, dimensions, intervals, granularity,
     limitSpec=nothing, having=nothing, filter=nothing, aggregations=nothing,
     postAggregations=nothing, virtualColumns=nothing, subtotalsSpec=nothing, context=nothing
 ) = GroupBy(
-    dataSource, dimesnions, intervals, granularity;
+    dataSource, dimensions, intervals, granularity;
     limitSpec, having, filter, aggregations, postAggregations, virtualColumns, subtotalsSpec, context
 )
 
