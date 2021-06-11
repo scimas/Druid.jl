@@ -72,7 +72,7 @@ Tables.rowaccess(::TimeseriesResult) = true
 Tables.rows(tr::TimeseriesResult) = tr
 
 Base.eltype(::TimeseriesResult) = TimeseriesRow
-Base.length(tr::TimeseriesResult) = length(tr.inner_array)
+Base.length(tr::TimeseriesResult) = length(getfield(tr, :inner_array))
 Base.iterate(tr::TimeseriesResult, state=1) = state > length(tr) ? nothing : (TimeseriesRow(state, tr), state + 1)
 
 struct TimeseriesRow
