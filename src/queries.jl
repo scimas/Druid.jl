@@ -7,51 +7,7 @@ include("timeseries.jl")
 include("topn.jl")
 include("groupby.jl")
 include("scan.jl")
-
-"""
-    Search(dataSource::DataSource, intervals::Vector{<:Interval}, query::SearchQuerySpec; <keyword arguments>)
-
-A method with all arguments as keyword arguments is also provided.
-
-# Arguments
-- granularity::Granularity = nothing
-- filter::Filter = nothing
-- virtualColumns::Vector{<:VirtualColumn} = nothing
-- sort::String = nothing
-- limit::Integer = nothing
-- context::Dict = nothing
-"""
-mutable struct Search <: Query
-    queryType::String
-    dataSource::DataSource
-    intervals::Vector{<:Interval}
-    query::SearchQuerySpec
-    granularity
-    filter
-    virtualColumns
-    sort
-    limit
-    context
-    function Search(
-        dataSource, intervals, query;
-        granularity=nothing, filter=nothing, virtualColumns=nothing, sort=nothing, limit=nothing, context=nothing
-    )
-        nothing_or_type(granularity, Granularity)
-        nothing_or_type(filter, Filter)
-        nothing_or_type(virtualColumns, Vector{<:VirtualColumn})
-        sort === nothing || (sort = lowercase(sort)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid sort value")
-        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
-        nothing_or_type(context, Dict)
-        new("search", dataSource, intervals, query, granularity, filter, virtualColumns, Dict("type" => sort), limit, context)
-    end
-end
-Search(
-    ; dataSource, intervals, query,
-    granularity=nothing, filter=nothing, virtualColumns=nothing, sort=nothing, limit=nothing, context=nothing
-) = Search(
-    dataSource, intervals, query;
-    granularity, filter, virtualColumns, sort, limit, context
-)
+include("search.jl")
 
 """
     TimeBoundary(dataSource::DataSource; <keyword arguments>)
