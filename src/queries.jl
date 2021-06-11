@@ -1,105 +1,10 @@
 JSON.lower(q::Query) = non_nothing_dict(q)
 query_type(q::Query) = q.queryType
-JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
 JSON.lower(ls::LimitSpec) = non_nothing_dict(ls)
 Tables.istable(::QueryResult) = true
 
 include("timeseries.jl")
-
-"""
-    Numeric(metric::String)
-
-Numeric topN metric spec.
-"""
-struct Numeric <: TopNMetricSpec
-    type::String
-    metric::String
-    Numeric(metric) = new("metric", metric)
-end
-
-"""
-    Dimension()
-    Dimension(; ordering=nothing, previousStop=nothing)
-
-Dimension topN metric spec.
-
-ordering and previousStop should be `String`s if provided.
-"""
-struct Dimension <: TopNMetricSpec
-    type::String
-    ordering
-    previousStop
-    function Dimension(; ordering=nothing, previousStop=nothing)
-        ordering === nothing || (ordering = lowercase(ordering)) ∈ ["lexicographic", "alphanumeric", "numeric", "strlen"] || error("Invalid ordering")
-        nothing_or_type(previousStop, String)
-        new("dimension", ordering, previousStop)
-    end
-end
-
-"""
-    Inverted(metric::TopNMetricSpec)
-
-Inverting topN metric spec.
-"""
-struct Inverted <: TopNMetricSpec
-    type::String
-    metric::TopNMetricSpec
-    Inverted(metric) = new("inverted", metric)
-end
-
-"""
-    TopN(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity,
-        dimension::DimensionSpec, threshold::Uint64, metric::TopNMetricSpec; <keyword arguments>)
-
-A method with all arguments as keyword arguments is also provided.
-
-# Arguments
-- aggregations::Vector{<:Aggregator} = nothing
-- postAggregations::Vector{<:PostAggregator} = nothing
-- filter::Filter = nothing
-- virtualColumns::Vector{<:VirtualColumn} = nothing
-- context::Dict = nothing
-"""
-mutable struct TopN <: Query
-    queryType::String
-    dataSource::DataSource
-    intervals::Vector{<:Interval}
-    granularity::Granularity
-    dimension::DimensionSpec
-    threshold::UInt64
-    metric::TopNMetricSpec
-    aggregations
-    postAggregations
-    filter
-    virtualColumns
-    context
-    function TopN(
-        dataSource, intervals, granularity, dimension, threshold, metric;
-        aggregations=nothing, postAggregations=nothing, filter=nothing, virtualColumns=nothing, context=nothing
-    )
-        nothing_or_type(aggregations, Vector{<:Aggregator})
-        nothing_or_type(postAggregations, Vector{<:PostAggregator})
-        nothing_or_type(filter, Filter)
-        nothing_or_type(virtualColumns, Vector{<:VirtualColumn})
-        nothing_or_type(context, Dict)
-        if !isa(metric, Numeric) && !(isa(metric, Inverted) && isa(metric.metric, Numeric))
-            if !(aggregations === nothing) || !(postAggregations === nothing)
-                error("Aggregations and post aggregations can only be specified for Numeric metric specs")
-            end
-        end
-        new(
-            "topN", dataSource, intervals, granularity, dimension, threshold, metric,
-            aggregations, postAggregations, filter, virtualColumns, context
-        )
-    end
-end
-TopN(
-    ; dataSource, intervals, granularity, dimension, threshold, metric,
-    aggregations=nothing, postAggregations=nothing, filter=nothing, virtualColumns=nothing, context=nothing
-) = TopN(
-    dataSource, intervals, granularity, dimension, threshold, metric;
-    aggregations, postAggregations, filter, virtualColumns, context
-)
+include("topn.jl")
 
 """
     OrderByColumn(dimension::String, direction::String; dimensionOrder=nothing)
