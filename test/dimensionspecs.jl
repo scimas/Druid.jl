@@ -53,22 +53,22 @@ end
 end
 
 @testset "JavaScriptEF" begin
-    @test_throws TypeError JavaScriptEF("function", injective=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) JavaScriptEF("function", injective=1)
 end
 
 @testset "RegisteredLookupEF" begin
-    @test_throws TypeError RegisteredLookupEF("lookup", injective=1)
-    @test_throws TypeError RegisteredLookupEF("lookup", retainMissingValue=1)
-    @test_throws TypeError RegisteredLookupEF("lookup", replaceMissingValueWith=1)
-    @test_throws TypeError RegisteredLookupEF("lookup", optimize=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) RegisteredLookupEF("lookup", injective=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) RegisteredLookupEF("lookup", retainMissingValue=1)
+    @test_throws TypeError(:typeassert, "", String, 1) RegisteredLookupEF("lookup", replaceMissingValueWith=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) RegisteredLookupEF("lookup", optimize=1)
     @test_throws ErrorException("Cannon specify replaceMissingValueWith when retainMissingValue == true") RegisteredLookupEF("lookup", retainMissingValue=true, replaceMissingValueWith="a")
 end
 
 @testset "InlineLookupEF" begin
-    @test_throws TypeError InlineLookupEF(lookupmap, injective=1)
-    @test_throws TypeError InlineLookupEF(lookupmap, retainMissingValue=1)
-    @test_throws TypeError InlineLookupEF(lookupmap, replaceMissingValueWith=1)
-    @test_throws TypeError InlineLookupEF(lookupmap, optimize=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) InlineLookupEF(lookupmap, injective=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) InlineLookupEF(lookupmap, retainMissingValue=1)
+    @test_throws TypeError(:typeassert, "", String, 1) InlineLookupEF(lookupmap, replaceMissingValueWith=1)
+    @test_throws TypeError(:typeassert, "", Bool, 1) InlineLookupEF(lookupmap, optimize=1)
     @test_throws ErrorException("Cannon specify replaceMissingValueWith when retainMissingValue == true") InlineLookupEF(lookupmap, retainMissingValue=true, replaceMissingValueWith="a")
 end
 
@@ -78,11 +78,11 @@ end
 end
 
 @testset "UpperEF" begin
-    @test_throws TypeError UpperEF(locale=1)
+    @test_throws TypeError(:typeassert, "", String, 1) UpperEF(locale=1)
 end
 
 @testset "LowerEF" begin
-    @test_throws TypeError LowerEF(locale=1)
+    @test_throws TypeError(:typeassert, "", String, 1) LowerEF(locale=1)
 end
 
 @testset "BucketEF" begin
