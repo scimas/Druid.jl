@@ -6,67 +6,7 @@ Tables.istable(::QueryResult) = true
 include("timeseries.jl")
 include("topn.jl")
 include("groupby.jl")
-
-"""
-    Scan(dataSource::DataSource, intervals::Vector{<:Interval}; <keyword arguments>)
-
-A method with all arguments as keyword arguments is also provided.
-
-# Arguments
-- columns::Vector{String} = nothing
-- filter::Filter = nothing
-- virtualColumns::Vector{<:VirtualColumn} = nothing
-- order::String = nothing
-- limit::Integer = nothing
-- offset::Integer = nothing
-- resultFormat::String = nothing
-- batchSize::Integer = nothing
-- context::Dict = nothing
-- legacy::Bool = nothing
-"""
-mutable struct Scan <: Query
-    queryType::String
-    dataSource::DataSource
-    intervals::Vector{<:Interval}
-    columns
-    filter
-    virtualColumns
-    order
-    limit
-    offset
-    resultFormat
-    batchSize
-    context
-    legacy
-    function Scan(
-        dataSource, intervals;
-        columns=nothing, filter=nothing, virtualColumns=nothing, order=nothing,
-        limit=nothing, offset=nothing, resultFormat=nothing,
-        batchSize=nothing, context=nothing, legacy=nothing
-    )
-        nothing_or_type(columns, Vector{String})
-        nothing_or_type(filter, Filter)
-        nothing_or_type(virtualColumns, Vector{<:VirtualColumn})
-        order === nothing || (order = lowercase(order)) ∈ ["ascending", "descending", "none"] || error("Invalid order")
-        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
-        offset === nothing || (isa(offset, Integer) && offset >= 0) || error("offset must be a non-negative integer")
-        resultFormat === nothing || resultFormat ∈ ["list", "compactedList"] || error("Invalid resultFormat")
-        batchSize === nothing || (isa(batchSize, Integer) && batchSize >= 0) || error("batchSize must be a non-negative integer")
-        nothing_or_type(context, Dict)
-        nothing_or_type(legacy, Bool)
-        new("scan", dataSource, intervals, columns, filter, virtualColumns, order, limit, offset, resultFormat, batchSize, context, legacy)
-    end
-end
-Scan(
-    ; dataSource, intervals,
-    columns=nothing, filter=nothing, virtualColumns=nothing, order=nothing,
-    limit=nothing, offset=nothing, resultFormat=nothing,
-    batchSize=nothing, context=nothing, legacy=nothing
-) = Scan(
-    dataSource, intervals;
-    columns, filter, virtualColumns, order, limit, offset, resultFormat,
-    batchSize, context, legacy
-)
+include("scan.jl")
 
 """
     Search(dataSource::DataSource, intervals::Vector{<:Interval}, query::SearchQuerySpec; <keyword arguments>)
