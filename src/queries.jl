@@ -8,35 +8,7 @@ include("topn.jl")
 include("groupby.jl")
 include("scan.jl")
 include("search.jl")
-
-"""
-    TimeBoundary(dataSource::DataSource; <keyword arguments>)
-
-A method with all arguments as keyword arguments is also provided.
-
-# Arguments
-- bound::String = nothing
-- filter::Filter = nothing
-- virtualColumns::Vector{<:VirtualColumn} = nothing
-- context::Dict = nothing
-"""
-mutable struct TimeBoundary <: Query
-    queryType::String
-    dataSource::DataSource
-    bound
-    filter
-    virtualColumns
-    context
-    function TimeBoundary(dataSource; bound=nothing, filter=nothing, virtualColumns=nothing, context=nothing)
-        bound === nothing || bound ∈ ["minTime", "maxTime"] || error("Invalid bound")
-        nothing_or_type(filter, Filter)
-        nothing_or_type(virtualColumns, Vector{<:VirtualColumn})
-        nothing_or_type(context, Dict)
-        new("timeBoundary", dataSource, bound, filter, virtualColumns, context)
-    end
-end
-TimeBoundary(; dataSource, bound=nothing, filter=nothing, virtualColumns=nothing, context=nothing) =
-    TimeBoundary(dataSource; bound, filter, virtualColumns, context)
+include("timeboundary.jl")
 
 """
     SegmentMetadata(dataSource::DataSource; <keyword arguments>)
