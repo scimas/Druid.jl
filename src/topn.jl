@@ -45,6 +45,8 @@ end
     TopN(dataSource::DataSource, intervals::Vector{Interval}, granularity::Granularity,
         dimension::DimensionSpec, threshold::Uint64, metric::TopNMetricSpec; <keyword arguments>)
 
+Returns a Druid.TopNResult which is compatible with the Tables.jl interface.
+
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments

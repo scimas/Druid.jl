@@ -1,6 +1,8 @@
 """
     Timeseries(dataSource::DataSource, intervals::Vector{<:Interval}, granularity::Granularity; <keyword arguments>)
 
+Returns a Druid.TimeseriesResult which is compatible with the Tables.jl interface.
+
 A method with all arguments as keyword arguments is also provided.
 
 # Arguments
