@@ -2,61 +2,9 @@ JSON.lower(q::Query) = non_nothing_dict(q)
 query_type(q::Query) = q.queryType
 JSON.lower(ms::TopNMetricSpec) = non_nothing_dict(ms)
 JSON.lower(ls::LimitSpec) = non_nothing_dict(ls)
+Tables.istable(::QueryResult) = true
 
-"""
-    Timeseries(dataSource::DataSource, intervals::Vector{<:Interval}, granularity::Granularity; <keyword arguments>)
-
-A method with all arguments as keyword arguments is also provided.
-
-# Arguments
-- filter::Filter = nothing
-- aggregations::Vector{<:Aggregator} = nothing
-- postAggregations::Vector{<:PostAggregator} = nothing
-- virtualColumns::Vector{<:VirtualColumn} = nothing
-- descending::Bool = nothing
-- limit::Integer = nothing
-- context::Dict = nothing
-"""
-mutable struct Timeseries <: Query
-    queryType::String
-    dataSource::DataSource
-    intervals::Vector{<:Interval}
-    granularity::Granularity
-    filter
-    aggregations
-    postAggregations
-    virtualColumns
-    descending
-    limit
-    context
-    function Timeseries(
-        dataSource, intervals, granularity;
-        filter=nothing, aggregations=nothing, postAggregations=nothing,
-        virtualColumns=nothing, descending=nothing, limit=nothing, context=nothing
-    )
-        nothing_or_type(filter, Filter)
-        nothing_or_type(aggregations, Vector{<:Aggregator})
-        nothing_or_type(postAggregations, Vector{<:PostAggregator})
-        nothing_or_type(virtualColumns, Vector{<:VirtualColumn})
-        nothing_or_type(descending, Bool)
-        limit === nothing || (isa(limit, Integer) && limit >= 0) || error("limit must be a non-negative integer")
-        nothing_or_type(context, Dict)
-        new(
-            "timeseries", dataSource, intervals, granularity,
-            filter, aggregations, postAggregations,
-            virtualColumns, descending, limit, context
-        )
-    end
-end
-Timeseries(
-    ; dataSource, intervals, granularity,
-    filter=nothing, aggregations=nothing, postAggregations=nothing,
-    virtualColumns=nothing, descending=nothing, limit=nothing, context=nothing
-) = Timeseries(
-    dataSource, intervals, granularity;
-    filter, aggregations, postAggregations,
-    virtualColumns, descending, limit, context
-)
+include("timeseries.jl")
 
 """
     Numeric(metric::String)
@@ -516,7 +464,9 @@ query_type(::Sql) = "SQL"
 Executes the native Druid `query` on the `client::Client`. Returns the query
 results as a String. Throws exception if query execution fails.
 """
-function execute(client::Client, query::Query; pretty=false)
+execute(client::Client, query::Query; pretty=false) = execute_native_query(client, query; pretty)
+
+function execute_native_query(client::Client, query::Query; pretty=false)
     url = joinpath(client.url, "druid/v2")
     if pretty
         url = merge(url, query="pretty")

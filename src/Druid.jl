@@ -9,6 +9,7 @@ module Druid
 using URIs
 using HTTP: request, IOError, StatusError
 using JSON
+using Tables
 
 # Druid connection
 export Client
@@ -151,6 +152,13 @@ abstract type VirtualColumn end
 Supertype of all queries.
 """
 abstract type Query end
+
+"""
+    QueryResult
+
+Supertype of all query results.
+"""
+abstract type QueryResult end
 
 include("utils.jl")
 include("client.jl")
