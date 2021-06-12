@@ -10,7 +10,8 @@ pkg> add Druid
 ## Usage
 
 ### Native Query
-Druid native queries [documentation](https://druid.apache.org/docs/latest/querying/querying.html)
+Druid native queries
+[documentation](https://druid.apache.org/docs/latest/querying/querying.html)
 ```julia
 using Druid
 
@@ -27,7 +28,8 @@ println(execute(client, timeseries_query))
 ```
 
 ### SQL Query
-Druid [SQL documentation](https://druid.apache.org/docs/latest/querying/sql.html)
+Druid [SQL
+documentation](https://druid.apache.org/docs/latest/querying/sql.html)
 ```julia
 using Druid
 
@@ -43,3 +45,21 @@ sql_query = Sql(query="""
 
 println(execute(client, sql_query))
 ```
+
+### Tables.jl compatibility
+Most native queries return the query response as an object compatible with the
+`Tables.jl` interface. So it is quite easy to convert the result into a
+`DataFrame`.
+
+```julia
+result = execute(client, query)
+df = DataFrame(result)
+```
+
+Compatible queries: `Timeseries`, `TopN`, `GroupBy`, `Scan`, `Search`.
+
+`TimeBoundary`, `SegmentMetadata` and `DatasourceMetadata` return their results
+as `Dict`s.
+
+`Sql` query returns the result as a `String`. Supporting the `Tables.jl`
+interface for SQL queries is planned.
