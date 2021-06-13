@@ -93,7 +93,7 @@ Base.eltype(::ScanResult) = ScanRow
 Base.length(sr::ScanResult) = getfield(sr, :num_rows)
 Base.iterate(sr::ScanResult, state=1) = state > length(sr) ? nothing : (ScanRow(state, sr), state + 1)
 
-struct ScanRow
+struct ScanRow <: Tables.AbstractRow
     row::Int
     source::ScanResult
 end

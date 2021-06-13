@@ -123,7 +123,7 @@ Base.eltype(::GroupByResult) = GroupByRow
 Base.length(gr::GroupByResult) = length(getfield(gr, :inner_array))
 Base.iterate(gr::GroupByResult, state=1) = state > length(gr) ? nothing : (GroupByRow(state, gr), state + 1)
 
-struct GroupByRow
+struct GroupByRow <: Tables.AbstractRow
     row::Int
     source::GroupByResult
 end

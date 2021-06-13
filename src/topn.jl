@@ -121,7 +121,7 @@ Base.eltype(::TopNResult) = TopNRow
 Base.length(tr::TopNResult) = length(getfield(tr, :inner_array))
 Base.iterate(tr::TopNResult, state=1) = state > length(tr) ? nothing : (TopNRow(state, tr), state + 1)
 
-struct TopNRow
+struct TopNRow <: Tables.AbstractRow
     row::Int
     source::TopNResult
 end

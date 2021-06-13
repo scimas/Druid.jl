@@ -84,7 +84,7 @@ Base.eltype(::SearchResult) = SearchRow
 Base.length(sr::SearchResult) = getfield(sr, :num_rows)
 Base.iterate(sr::SearchResult, state=1) = state > length(sr) ? nothing : (SearchRow(state, sr), state + 1)
 
-struct SearchRow
+struct SearchRow <: Tables.AbstractRow
     row::Int
     source::SearchResult
 end

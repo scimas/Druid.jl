@@ -77,7 +77,7 @@ Base.eltype(::TimeseriesResult) = TimeseriesRow
 Base.length(tr::TimeseriesResult) = length(getfield(tr, :inner_array))
 Base.iterate(tr::TimeseriesResult, state=1) = state > length(tr) ? nothing : (TimeseriesRow(state, tr), state + 1)
 
-struct TimeseriesRow
+struct TimeseriesRow <: Tables.AbstractRow
     row::Int
     source::TimeseriesResult
 end
