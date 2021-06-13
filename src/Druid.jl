@@ -10,6 +10,7 @@ using URIs
 using HTTP: request, IOError, StatusError
 using JSON
 using Tables
+using CSV
 
 # Druid connection
 export Client

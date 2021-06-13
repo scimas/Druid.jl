@@ -47,19 +47,20 @@ println(execute(client, sql_query))
 ```
 
 ### Tables.jl compatibility
-Most native queries return the query response as an object compatible with the
-`Tables.jl` interface. So it is quite easy to convert the result into a
-`DataFrame`.
+Most queries return the query response as an object compatible with the
+`Tables.jl` interface. So it is quite easy to convert the result into another
+compatible type, like `DataFrame`.
 
 ```julia
 result = execute(client, query)
 df = DataFrame(result)
 ```
 
-Compatible queries: `Timeseries`, `TopN`, `GroupBy`, `Scan`, `Search`.
+Compatible queries: `Timeseries`, `TopN`, `GroupBy`, `Scan`, `Search`, `Sql`.
+
+`Sql` query returns the result as either a `Druid.SqlResult{ResultFormat}` or a
+`CSV.File` depending on the `resultFormat` provided in the SQL query. Both are
+compatible with the Tables.jl interface.
 
 `TimeBoundary`, `SegmentMetadata` and `DatasourceMetadata` return their results
 as `Dict`s.
-
-`Sql` query returns the result as a `String`. Supporting the `Tables.jl`
-interface for SQL queries is planned.
