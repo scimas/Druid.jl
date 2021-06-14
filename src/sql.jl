@@ -79,7 +79,14 @@ Tables.getcolumn(sr::SqlRow{Vector{Dict}}, i::Int) = Tables.getcolumn(sr, names(
 Tables.columnnames(sr::SqlRow{Vector{Dict}}) = names(getfield(sr, :source))
 
 function transform_result(res, header, ::Val{:object}; names=:auto)
-    d = convert(Vector{Dict}, JSON.parse(res))
+    local interm
+    try
+        interm = JSON.parse(res)
+    catch e
+        println("Corrupted response received from Druid, unable to parse")
+        rethrow(e)
+    end
+    d = convert(Vector{Dict}, interm)
     if names == :auto
         if header == true
             names = Symbol.(keys(popfirst!(d)))
@@ -93,7 +100,13 @@ function transform_result(res, header, ::Val{:object}; names=:auto)
 end
 
 function transform_result(res, header, ::Val{:objectLines}; names=:auto)
-    d = JSON.parse.(split(strip(res), '\n'))
+    length(res) >= 2 && res[end - 1:end] == "\n\n" || error("Corrupted response received from Druid, unable to parse")
+    interm = strip(res)
+    if interm == ""
+        d = Dict[]
+    else
+        d = JSON.parse.(split(interm, '\n'))
+    end
     if names == :auto
         if header == true
             names = Symbol.(keys(popfirst!(d)))
@@ -124,7 +137,13 @@ Tables.getcolumn(sr::SqlRow{Matrix}, i::Int) = Tables.getcolumn(sr, names(getfie
 Tables.columnnames(sr::SqlRow{Matrix}) = names(getfield(sr, :source))
 
 function transform_result(res, header, ::Val{:array}; names=:auto)
-    interm = JSON.parse(res)
+    local interm
+    try
+        interm = JSON.parse(res)
+    catch e
+        println("Corrupted response received from Druid, unable to parse")
+        rethrow(e)
+    end
     if names == :auto
         if header == true
             names = Symbol.(popfirst!(interm))
@@ -139,7 +158,13 @@ function transform_result(res, header, ::Val{:array}; names=:auto)
 end
 
 function transform_result(res, header, ::Val{:arrayLines}; names=:auto)
-    interm = JSON.parse.(split(strip(res), '\n'))
+    length(res) >= 2 && res[end - 1:end] == "\n\n" || error("Corrupted response received from Druid, unable to parse")
+    stripped = strip(res)
+    if stripped == ""
+        interm = Vector{Any}[]
+    else
+        interm = JSON.parse.(split(stripped, '\n'))
+    end
     if names == :auto
         if header == true
             names = Symbol.(popfirst!(interm))
@@ -149,12 +174,18 @@ function transform_result(res, header, ::Val{:arrayLines}; names=:auto)
             names = Symbol[]
         end
     end
-    d = permutedims(reduce(hcat, interm))
+    if interm == []
+        d = Matrix{Any}(undef, 0, 0)
+    else
+        d = permutedims(reduce(hcat, interm))
+    end
     SqlResult(names, d)
 end
 
 # resultFormat = "csv"
 function transform_result(res, header, ::Val{:csv}; names=:auto)
+    (length(res) >= 2 && res[end - 1:end] == "\n\n") || 
+        (length(res) == 1 && res[end] == '\n') || error("Corrupted response received from Druid, unable to parse")
     if names == :auto
         if header == true
             return CSV.File(IOBuffer(res); header)
