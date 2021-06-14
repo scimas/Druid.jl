@@ -62,21 +62,22 @@ struct SqlRow{T} <: Tables.AbstractRow
 end
 
 # resultFormat = "object", "objectLines"
-Tables.istable(::SqlResult{Vector{Dict}}) = true
-names(sr::SqlResult{Vector{Dict}}) = getfield(sr, :names)
+Tables.istable(::SqlResult{Vector{Dict{String, T}}}) where {T} = true
+names(sr::SqlResult{Vector{Dict{String, T}}}) where {T} = getfield(sr, :names)
 
-Base.getindex(sr::SqlResult{Vector{Dict}}, i::Int) = getfield(sr, :inner_data)[i]
+Base.summary(io::IO, sr::SqlResult{Vector{Dict{String, T}}}) where {T} = print(io, string(length(sr)) * "-element " * string(typeof(sr)))
+Base.getindex(sr::SqlResult{Vector{Dict{String, T}}}, i::Int) where {T} = (i <= length(sr) || throw(BoundsError(sr, i))) && SqlRow(i, sr)
 
-Tables.rowaccess(::SqlResult{Vector{Dict}}) = true
-Tables.rows(sr::SqlResult{Vector{Dict}}) = sr
+Tables.rowaccess(::SqlResult{Vector{Dict{String, T}}}) where {T} = true
+Tables.rows(sr::SqlResult{Vector{Dict{String, T}}}) where {T} = sr
 
-Base.eltype(::SqlResult{T}) where {T<:Vector{Dict}} = SqlRow{T}
-Base.length(sr::SqlResult{Vector{Dict}}) = length(getfield(sr, :inner_data))
-Base.iterate(sr::SqlResult{Vector{Dict}}, state=1) = state > length(sr) ? nothing : (SqlRow(state, sr), state + 1)
+Base.eltype(::SqlResult{Vector{Dict{String, T}}}) where {T} = SqlRow{Vector{Dict{String, T}}}
+Base.length(sr::SqlResult{Vector{Dict{String, T}}}) where {T} = length(getfield(sr, :inner_data))
+Base.iterate(sr::SqlResult{Vector{Dict{String, T}}}, state=1) where {T} = state > length(sr) ? nothing : (SqlRow(state, sr), state + 1)
 
-Tables.getcolumn(sr::SqlRow{Vector{Dict}}, name::Symbol) = getfield(sr, :source)[getfield(sr, :row)][string(name)]
-Tables.getcolumn(sr::SqlRow{Vector{Dict}}, i::Int) = Tables.getcolumn(sr, names(getfield(sr, :source))[i])
-Tables.columnnames(sr::SqlRow{Vector{Dict}}) = names(getfield(sr, :source))
+Tables.getcolumn(sr::SqlRow{Vector{Dict{String, T}}}, name::Symbol) where {T} = getfield(getfield(sr, :source), :inner_data)[getfield(sr, :row)][string(name)]
+Tables.getcolumn(sr::SqlRow{Vector{Dict{String, T}}}, i::Int) where {T} = Tables.getcolumn(sr, names(getfield(sr, :source))[i])
+Tables.columnnames(sr::SqlRow{Vector{Dict{String, T}}}) where {T} = names(getfield(sr, :source))
 
 function transform_result(res, header, ::Val{:object}; names=:auto)
     local interm
@@ -86,7 +87,7 @@ function transform_result(res, header, ::Val{:object}; names=:auto)
         println("Corrupted response received from Druid, unable to parse")
         rethrow(e)
     end
-    d = convert(Vector{Dict}, interm)
+    d = convert(Vector{Dict{String, Any}}, interm)
     if names == :auto
         if header == true
             names = Symbol.(keys(popfirst!(d)))
@@ -103,7 +104,7 @@ function transform_result(res, header, ::Val{:objectLines}; names=:auto)
     length(res) >= 2 && res[end - 1:end] == "\n\n" || error("Corrupted response received from Druid, unable to parse")
     interm = strip(res)
     if interm == ""
-        d = Dict[]
+        d = Dict{String, Any}[]
     else
         d = JSON.parse.(split(interm, '\n'))
     end
@@ -120,21 +121,22 @@ function transform_result(res, header, ::Val{:objectLines}; names=:auto)
 end
 
 # resultFormat = "array", "arrayLines"
-Tables.istable(::SqlResult{Matrix}) = true
-names(sr::SqlResult{Matrix}) = getfield(sr, :names)
+Tables.istable(::SqlResult{Matrix{T}}) where {T} = true
+names(sr::SqlResult{Matrix{T}}) where {T} = getfield(sr, :names)
 
-Base.getindex(sr::SqlResult{Matrix}, i::Int) = getfield(sr, :inner_data)[i, :]
+Base.summary(io::IO, sr::SqlResult{Matrix{T}}) where {T} = print(io, string(length(sr)) * "-element " * string(typeof(sr)))
+Base.getindex(sr::SqlResult{Matrix{T}}, i::Int) where {T} = (i <= length(sr) || throw(BoundsError(sr, i))) && SqlRow(i, sr)
 
-Tables.rowaccess(::SqlResult{Matrix}) = true
-Tables.rows(sr::SqlResult{Matrix}) = sr
+Tables.rowaccess(::SqlResult{Matrix{T}}) where {T} = true
+Tables.rows(sr::SqlResult{Matrix{T}}) where {T} = sr
 
 Base.eltype(::SqlResult{T}) where {T<:Matrix} = SqlRow{T}
-Base.length(sr::SqlResult{Matrix}) = size(getfield(sr, :inner_data), 1)
-Base.iterate(sr::SqlResult{Matrix}, state=1) = state > length(sr) ? nothing : (SqlRow(state, sr), state + 1)
+Base.length(sr::SqlResult{Matrix{T}}) where {T} = size(getfield(sr, :inner_data), 1)
+Base.iterate(sr::SqlResult{Matrix{T}}, state=1) where {T} = state > length(sr) ? nothing : (SqlRow(state, sr), state + 1)
 
-Tables.getcolumn(sr::SqlRow{Matrix}, name::Symbol) = getfield(sr, :source)[getfield(sr, :row)][string(name)]
-Tables.getcolumn(sr::SqlRow{Matrix}, i::Int) = Tables.getcolumn(sr, names(getfield(sr, :source))[i])
-Tables.columnnames(sr::SqlRow{Matrix}) = names(getfield(sr, :source))
+Tables.getcolumn(sr::SqlRow{Matrix{T}}, i::Int) where {T} = getfield(getfield(sr, :source), :inner_data)[getfield(sr, :row), i]
+Tables.getcolumn(sr::SqlRow{Matrix{T}}, name::Symbol) where {T} = Tables.getcolumn(sr, findfirst(name .== names(getfield(sr, :source))))
+Tables.columnnames(sr::SqlRow{Matrix{T}}) where {T} = names(getfield(sr, :source))
 
 function transform_result(res, header, ::Val{:array}; names=:auto)
     local interm
@@ -153,7 +155,11 @@ function transform_result(res, header, ::Val{:array}; names=:auto)
             names = Symbol[]
         end
     end
-    d = permutedims(reduce(hcat, interm))
+    if interm == []
+        d = Matrix{Any}(undef, 0, 0)
+    else
+        d = permutedims(reduce(hcat, interm))
+    end
     SqlResult(names, d)
 end
 
