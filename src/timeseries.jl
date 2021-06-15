@@ -68,7 +68,7 @@ end
 
 names(tr::TimeseriesResult) = getfield(tr, :names)
 
-Base.getindex(tr::TimeseriesResult, i::Int) = getfield(tr, :inner_array)[i]
+Base.getindex(tr::TimeseriesResult, i::Int) = TimeseriesRow(i, tr)
 
 Tables.rowaccess(::TimeseriesResult) = true
 Tables.rows(tr::TimeseriesResult) = tr
@@ -84,15 +84,11 @@ end
 
 function Tables.getcolumn(tr::TimeseriesRow, name::Symbol)
     if name == :timestamp
-        getfield(tr, :source)[getfield(tr, :row)][string(name)]
+        getfield(getfield(tr, :source), :inner_array)[getfield(tr, :row)][string(name)]
     else
-        getfield(tr, :source)[getfield(tr, :row)]["result"][string(name)]
+        getfield(getfield(tr, :source), :inner_array)[getfield(tr, :row)]["result"][string(name)]
     end
 end
 
 Tables.getcolumn(tr::TimeseriesRow, i::Int) = Tables.getcolumn(tr, names(getfield(tr, :source))[i])
 Tables.columnnames(tr::TimeseriesRow) = names(getfield(tr, :source))
-
-function Base.show(io::IO, tr::TimeseriesRow)
-    print(io, getfield(tr, :source)[getfield(tr, :row)])
-end

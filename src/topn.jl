@@ -112,7 +112,7 @@ end
 
 names(tr::TopNResult) = getfield(tr, :names)
 
-Base.getindex(tr::TopNResult, i::Int) = getfield(tr, :inner_array)[i]
+Base.getindex(tr::TopNResult, i::Int) = TopNRow(i, tr)
 
 Tables.rowaccess(::TopNResult) = true
 Tables.rows(tr::TopNResult) = tr
@@ -128,17 +128,13 @@ end
 
 function Tables.getcolumn(tr::TopNRow, name::Symbol)
     if name == :timestamp
-        getfield(tr, :source)[getfield(tr, :row)][string(name)]
+        getfield(getfield(tr, :source), :inner_array)[getfield(tr, :row)][string(name)]
     else
         pattern = r"^top(\d)_(.*)$"
         m = match(pattern, string(name))
-        getfield(tr, :source)[getfield(tr, :row)]["result"][parse(Int, m.captures[1])][m.captures[2]]
+        getfield(getfield(tr, :source), :inner_array)[getfield(tr, :row)]["result"][parse(Int, m.captures[1])][m.captures[2]]
     end
 end
 
 Tables.getcolumn(tr::TopNRow, i::Int) = Tables.getcolumn(tr, names(getfield(tr, :source))[i])
 Tables.columnnames(tr::TopNRow) = names(getfield(tr, :source))
-
-function Base.show(io::IO, tr::TopNRow)
-    print(io, getfield(tr, :source)[getfield(tr, :row)])
-end

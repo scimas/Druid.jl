@@ -114,7 +114,7 @@ end
 
 names(gr::GroupByResult) = getfield(gr, :names)
 
-Base.getindex(gr::GroupByResult, i::Int) = getfield(gr, :inner_array)[i]
+Base.getindex(gr::GroupByResult, i::Int) = GroupByRow(i, gr)
 
 Tables.rowaccess(::GroupByResult) = true
 Tables.rows(gr::GroupByResult) = gr
@@ -130,15 +130,11 @@ end
 
 function Tables.getcolumn(gr::GroupByRow, name::Symbol)
     if name == :timestamp
-        getfield(gr, :source)[getfield(gr, :row)][string(name)]
+        getfield(getfield(gr, :source), :inner_array)[getfield(gr, :row)][string(name)]
     else
-        getfield(gr, :source)[getfield(gr, :row)]["event"][string(name)]
+        getfield(getfield(gr, :source), :inner_array)[getfield(gr, :row)]["event"][string(name)]
     end
 end
 
 Tables.getcolumn(gr::GroupByRow, i::Int) = Tables.getcolumn(gr, names(getfield(gr, :source))[i])
 Tables.columnnames(gr::GroupByRow) = names(getfield(gr, :source))
-
-function Base.show(io::IO, gr::GroupByRow)
-    print(io, getfield(gr, :source)[getfield(gr, :row)])
-end

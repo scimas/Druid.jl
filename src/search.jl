@@ -63,19 +63,7 @@ end
 
 names(sr::SearchResult) = getfield(sr, :names)
 
-function Base.getindex(sr::SearchResult, i::Int)
-    i <= length(sr) || throw(BoundsError(sr, i))
-    elems = 0
-    for subres ∈ getfield(sr, :inner_array)
-        subelems = length(subres["result"])
-        if i <= elems + subelems
-            row = Dict(subres["result"][i - elems])
-            row["timestamp"] = subres["timestamp"]
-            return row
-        end
-        elems += subelems
-    end
-end
+Base.getindex(sr::SearchResult, i::Int) = (i <= length(sr) || throw(BoundsError(sr, i))) && SearchRow(i, sr)
 
 Tables.rowaccess(::SearchResult) = true
 Tables.rows(sr::SearchResult) = sr
@@ -90,12 +78,18 @@ struct SearchRow <: Tables.AbstractRow
 end
 
 function Tables.getcolumn(sr::SearchRow, name::Symbol)
-    getfield(sr, :source)[getfield(sr, :row)][string(name)]
+    elems = 0
+    i = getfield(sr, :row)
+    for subres ∈ getfield(getfield(sr, :source), :inner_array)
+        subelems = length(subres["result"])
+        if i <= elems + subelems
+            row = Dict(subres["result"][i - elems])
+            row["timestamp"] = subres["timestamp"]
+            return row
+        end
+        elems += subelems
+    end
 end
 
 Tables.getcolumn(sr::SearchRow, i::Int) = Tables.getcolumn(sr, names(getfield(sr, :source))[i])
 Tables.columnnames(sr::SearchRow) = names(getfield(sr, :source))
-
-function Base.show(io::IO, sr::SearchRow)
-    print(io, getfield(sr, :source)[getfield(sr, :row)])
-end

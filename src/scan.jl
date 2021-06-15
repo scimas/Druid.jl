@@ -74,17 +74,7 @@ end
 
 names(sr::ScanResult) = getfield(sr, :names)
 
-function Base.getindex(sr::ScanResult, i::Int)
-    i <= length(sr) || throw(BoundsError(sr, i))
-    elems = 0
-    for subres ∈ getfield(sr, :inner_array)
-        subelems = length(subres["events"])
-        if i <= elems + subelems
-            return subres["events"][i - elems]
-        end
-        elems += subelems
-    end
-end
+Base.getindex(sr::ScanResult, i::Int) = (i <= length(sr) || throw(BoundsError(sr, i))) && ScanRow(i, sr)
 
 Tables.rowaccess(::ScanResult) = true
 Tables.rows(sr::ScanResult) = sr
@@ -98,10 +88,17 @@ struct ScanRow <: Tables.AbstractRow
     source::ScanResult
 end
 
-Tables.getcolumn(sr::ScanRow, name::Symbol) = getfield(sr, :source)[getfield(sr, :row)][string(name)]
+function Tables.getcolumn(sr::ScanRow, name::Symbol)
+    elems = 0
+    i = getfield(sr, :row)
+    for subres ∈ getfield(getfield(sr, :source), :inner_array)
+        subelems = length(subres["events"])
+        if i <= elems + subelems
+            return subres["events"][i - elems]
+        end
+        elems += subelems
+    end
+end
+
 Tables.getcolumn(sr::ScanRow, i::Int) = Tables.getcolumn(sr, names(getfield(sr, :source))[i])
 Tables.columnnames(sr::ScanRow) = names(getfield(sr, :source))
-
-function Base.show(io::IO, sr::ScanRow)
-    print(io, getfield(sr, :source)[getfield(sr, :row)])
-end
