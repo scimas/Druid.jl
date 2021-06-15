@@ -75,6 +75,15 @@ Base.eltype(::SqlResult{Vector{Dict{String, T}}}) where {T} = SqlRow{Vector{Dict
 Base.length(sr::SqlResult{Vector{Dict{String, T}}}) where {T} = length(getfield(sr, :inner_data))
 Base.iterate(sr::SqlResult{Vector{Dict{String, T}}}, state=1) where {T} = state > length(sr) ? nothing : (SqlRow(state, sr), state + 1)
 
+function Tables.schema(sr::SqlResult{Vector{Dict{String, T}}}) where {T}
+    if length(sr) != 0
+        types = [typeof(cl) for cl in sr[1]]
+    else
+        types = DataType[]
+    end
+    Tables.Schema(names(sr), types)
+end
+
 Tables.getcolumn(sr::SqlRow{Vector{Dict{String, T}}}, name::Symbol) where {T} = getfield(getfield(sr, :source), :inner_data)[getfield(sr, :row)][string(name)]
 Tables.getcolumn(sr::SqlRow{Vector{Dict{String, T}}}, i::Int) where {T} = Tables.getcolumn(sr, names(getfield(sr, :source))[i])
 Tables.columnnames(sr::SqlRow{Vector{Dict{String, T}}}) where {T} = names(getfield(sr, :source))
@@ -133,6 +142,15 @@ Tables.rows(sr::SqlResult{Matrix{T}}) where {T} = sr
 Base.eltype(::SqlResult{T}) where {T<:Matrix} = SqlRow{T}
 Base.length(sr::SqlResult{Matrix{T}}) where {T} = size(getfield(sr, :inner_data), 1)
 Base.iterate(sr::SqlResult{Matrix{T}}, state=1) where {T} = state > length(sr) ? nothing : (SqlRow(state, sr), state + 1)
+
+function Tables.schema(sr::SqlResult{Matrix{T}}) where {T}
+    if length(sr) != 0
+        types = [typeof(cl) for cl in sr[1]]
+    else
+        types = DataType[]
+    end
+    Tables.Schema(names(sr), types)
+end
 
 Tables.getcolumn(sr::SqlRow{Matrix{T}}, i::Int) where {T} = getfield(getfield(sr, :source), :inner_data)[getfield(sr, :row), i]
 Tables.getcolumn(sr::SqlRow{Matrix{T}}, name::Symbol) where {T} = Tables.getcolumn(sr, findfirst(name .== names(getfield(sr, :source))))
@@ -226,5 +244,11 @@ Dict{String,Any}("errorClass" => "org.apache.calcite.tools.ValidationException".
 function execute(client::Client, query::Sql, names=:auto)
     names == :auto || typeassert(names, Vector{Symbol})
     url = joinpath(client.url, "druid/v2/sql")
-    transform_result(do_query(url, query), query.header, Val(Symbol(query.resultFormat)); names=names)
+    header = query.header == true
+    if query.resultFormat === nothing
+        resultFormat = "object"
+    else
+        resultFormat = query.resultFormat
+    end
+    transform_result(do_query(url, query), header, Val(Symbol(resultFormat)); names=names)
 end

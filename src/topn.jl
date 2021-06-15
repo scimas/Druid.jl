@@ -126,6 +126,15 @@ Base.eltype(::TopNResult) = TopNRow
 Base.length(tr::TopNResult) = length(getfield(tr, :inner_array))
 Base.iterate(tr::TopNResult, state=1) = state > length(tr) ? nothing : (TopNRow(state, tr), state + 1)
 
+function Tables.schema(tr::TopNResult)
+    if length(tr) != 0
+        types = [typeof(cl) for cl in tr[1]]
+    else
+        types = DataType[]
+    end
+    Tables.Schema(names(tr), types)
+end
+
 struct TopNRow <: Tables.AbstractRow
     row::Int
     source::TopNResult

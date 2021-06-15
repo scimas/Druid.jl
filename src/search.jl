@@ -73,6 +73,15 @@ Base.eltype(::SearchResult) = SearchRow
 Base.length(sr::SearchResult) = getfield(sr, :num_rows)
 Base.iterate(sr::SearchResult, state=1) = state > length(sr) ? nothing : (SearchRow(state, sr), state + 1)
 
+function Tables.schema(sr::SearchResult)
+    if length(sr) != 0
+        types = [typeof(cl) for cl in sr[1]]
+    else
+        types = DataType[]
+    end
+    Tables.Schema(names(sr), types)
+end
+
 struct SearchRow <: Tables.AbstractRow
     row::Int
     source::SearchResult

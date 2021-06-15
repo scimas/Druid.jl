@@ -89,6 +89,15 @@ Base.eltype(::ScanResult) = ScanRow
 Base.length(sr::ScanResult) = getfield(sr, :num_rows)
 Base.iterate(sr::ScanResult, state=1) = state > length(sr) ? nothing : (ScanRow(state, sr), state + 1)
 
+function Tables.schema(sr::ScanResult)
+    if length(sr) != 0
+        types = [typeof(cl) for cl in sr[1]]
+    else
+        types = DataType[]
+    end
+    Tables.Schema(names(sr), types)
+end
+
 struct ScanRow <: Tables.AbstractRow
     row::Int
     source::ScanResult

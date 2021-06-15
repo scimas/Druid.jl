@@ -128,6 +128,15 @@ Base.eltype(::GroupByResult) = GroupByRow
 Base.length(gr::GroupByResult) = length(getfield(gr, :inner_array))
 Base.iterate(gr::GroupByResult, state=1) = state > length(gr) ? nothing : (GroupByRow(state, gr), state + 1)
 
+function Tables.schema(gr::GroupByResult)
+    if length(gr) != 0
+        types = [typeof(cl) for cl in gr[1]]
+    else
+        types = DataType[]
+    end
+    Tables.Schema(names(gr), types)
+end
+
 struct GroupByRow <: Tables.AbstractRow
     row::Int
     source::GroupByResult
