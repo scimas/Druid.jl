@@ -61,8 +61,13 @@ Scan(
 
 function execute(client::Client, query::Scan; pretty=false)
     res = convert(Vector{Dict}, JSON.parse(execute_native_query(client, query; pretty)))
-    names = Symbol.(res[1]["columns"])
-    num_rows = sum(length(subres["events"]) for subres ∈ res)
+    if length(res) != 0
+        names = Symbol.(res[1]["columns"])
+        num_rows = sum(length(subres["events"]) for subres ∈ res)
+    else
+        names = Symbol[]
+        num_rows = 0
+    end
     ScanResult(names, num_rows, res)
 end
 
@@ -74,6 +79,7 @@ end
 
 names(sr::ScanResult) = getfield(sr, :names)
 
+Base.summary(io::IO, sr::ScanResult) = print(io, string(length(sr)) * "-element " * string(typeof(sr)))
 Base.getindex(sr::ScanResult, i::Int) = (i <= length(sr) || throw(BoundsError(sr, i))) && ScanRow(i, sr)
 
 Tables.rowaccess(::ScanResult) = true

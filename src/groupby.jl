@@ -103,7 +103,11 @@ GroupBy(
 
 function execute(client::Client, query::GroupBy; pretty=false)
     res = convert(Vector{Dict}, JSON.parse(execute_native_query(client, query; pretty)))
-    names = [:timestamp, Symbol.(keys(res[1]["event"]))...]
+    if length(res) != 0
+        names = [:timestamp, Symbol.(keys(res[1]["event"]))...]
+    else
+        names = Symbol[]
+    end
     GroupByResult(names, res)
 end
 
@@ -114,7 +118,8 @@ end
 
 names(gr::GroupByResult) = getfield(gr, :names)
 
-Base.getindex(gr::GroupByResult, i::Int) = GroupByRow(i, gr)
+Base.summary(io::IO, gr::GroupByResult) = print(io, string(length(gr)) * "-element " * string(typeof(gr)))
+Base.getindex(gr::GroupByResult, i::Int) = (i <= length(gr) || throw(BoundsError(gr, i))) && GroupByRow(i, gr)
 
 Tables.rowaccess(::GroupByResult) = true
 Tables.rows(gr::GroupByResult) = gr

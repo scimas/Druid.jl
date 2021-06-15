@@ -100,8 +100,12 @@ TopN(
 function execute(client::Client, query::TopN; pretty=false)
     res = convert(Vector{Dict}, JSON.parse(execute_native_query(client, query; pretty)))
     prefixes = ["top" * string(i) * '_' for i in 1:query.threshold]
-    names = vec([Symbol(p * k) for (p, k) ∈ Iterators.product(prefixes, keys(res[1]["result"][1]))])
-    push!(names, :timestamp)
+    if length(res) != 0
+        names = vec([Symbol(p * k) for (p, k) ∈ Iterators.product(prefixes, keys(res[1]["result"][1]))])
+        push!(names, :timestamp)
+    else
+        names = Symbol[]
+    end
     TopNResult(names, res)
 end
 
@@ -112,7 +116,8 @@ end
 
 names(tr::TopNResult) = getfield(tr, :names)
 
-Base.getindex(tr::TopNResult, i::Int) = TopNRow(i, tr)
+Base.summary(io::IO, tr::TopNResult) = print(io, string(length(tr)) * "-element " * string(typeof(tr)))
+Base.getindex(tr::TopNResult, i::Int) = (i <= length(tr) || throw(BoundsError(tr, i))) && TopNRow(i, tr)
 
 Tables.rowaccess(::TopNResult) = true
 Tables.rows(tr::TopNResult) = tr

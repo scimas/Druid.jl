@@ -63,6 +63,7 @@ end
 
 names(sr::SearchResult) = getfield(sr, :names)
 
+Base.summary(io::IO, sr::SearchResult) = print(io, string(length(sr)) * "-element " * string(typeof(sr)))
 Base.getindex(sr::SearchResult, i::Int) = (i <= length(sr) || throw(BoundsError(sr, i))) && SearchRow(i, sr)
 
 Tables.rowaccess(::SearchResult) = true

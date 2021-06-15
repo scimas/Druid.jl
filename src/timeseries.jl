@@ -57,7 +57,11 @@ Timeseries(
 
 function execute(client::Client, query::Timeseries; pretty=false)
     res = convert(Vector{Dict}, JSON.parse(execute_native_query(client, query; pretty)))
-    names = [:timestamp, Symbol.(keys(res[1]["result"]))...]
+    if length(res) != 0
+        names = [:timestamp, Symbol.(keys(res[1]["result"]))...]
+    else
+        names = Symbol[]
+    end
     TimeseriesResult(names, res)
 end
 
@@ -68,7 +72,8 @@ end
 
 names(tr::TimeseriesResult) = getfield(tr, :names)
 
-Base.getindex(tr::TimeseriesResult, i::Int) = TimeseriesRow(i, tr)
+Base.summary(io::IO, tr::TimeseriesResult) = print(io, string(length(tr)) * "-element " * string(typeof(tr)))
+Base.getindex(tr::TimeseriesResult, i::Int) = (i <= length(tr) || throw(BoundsError(tr, i))) && TimeseriesRow(i, tr)
 
 Tables.rowaccess(::TimeseriesResult) = true
 Tables.rows(tr::TimeseriesResult) = tr
